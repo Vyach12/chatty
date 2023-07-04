@@ -1,20 +1,32 @@
 package ru.gusarov.messenger.controllers;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import ru.gusarov.messenger.services.AuthenticationService;
+import ru.gusarov.messenger.utils.AuthenticationRequest;
+import ru.gusarov.messenger.utils.AuthenticationResponse;
+import ru.gusarov.messenger.utils.RegisterRequest;
 
-@Controller
-@RequestMapping("/auth")
+@RestController
+@RequestMapping("/api/v1/auth")
+@RequiredArgsConstructor
 public class AuthenticationController {
 
-    @GetMapping("/login")
-    public String loginPage() {
-        return "auth/login";
+    private final AuthenticationService service;
+
+    @PostMapping("/register")
+    public ResponseEntity<AuthenticationResponse> register(
+            @RequestBody RegisterRequest request
+    ){
+        return ResponseEntity.ok(service.register(request));
     }
 
-    @GetMapping("/registration")
-    public String regPage() {
-        return "auth/registration";
+    @PostMapping("/authenticate")
+    public ResponseEntity<AuthenticationResponse> authenticate(
+            @RequestBody AuthenticationRequest request
+    ){
+        return ResponseEntity.ok(service.authenticate(request));
     }
+
 }
