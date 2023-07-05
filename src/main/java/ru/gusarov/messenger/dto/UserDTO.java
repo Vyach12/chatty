@@ -1,4 +1,4 @@
-package ru.gusarov.messenger.utils;
+package ru.gusarov.messenger.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -6,10 +6,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthenticationRequest {
+@Builder
+public class UserDTO {
     private String username;
-    public String password;
+    private String role;
 }

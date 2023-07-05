@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 
-import java.util.Set;
+import java.util.List;
 
 @Data
 @Builder
@@ -23,7 +23,7 @@ public class Role implements GrantedAuthority {
 
     @Transient
     @OneToMany(mappedBy = "role")
-    private Set<User> users;
+    private List<User> users;
 
     @Column(name = "name")
     private String name;
