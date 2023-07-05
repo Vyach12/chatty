@@ -1,5 +1,6 @@
 package ru.gusarov.messenger.controllers;
 
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -7,12 +8,14 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import ru.gusarov.messenger.dto.MessageDTO;
+import ru.gusarov.messenger.models.Message;
 import ru.gusarov.messenger.models.User;
 import ru.gusarov.messenger.services.MessageService;
 import ru.gusarov.messenger.services.UserService;
 import ru.gusarov.messenger.utils.UserErrorResponse;
 import ru.gusarov.messenger.utils.UserException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -32,6 +35,26 @@ public class MessageController {
                         .map(messageService::convertToMessageDTO)
                         .toList();
         return ResponseEntity.ok(list);
+    }
+
+    @PostMapping("/{username}")
+    public ResponseEntity<HttpStatus> sendMessage(
+            @PathVariable String username,
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody String textMessage) {
+        User recipient = userService.findByUsername(username);
+        User sender = userService.findByUsername(userDetails.getUsername());
+
+        Message message = Message.builder()
+                .sender(sender)
+                .recipient(recipient)
+                .message(textMessage)
+                .dateOfSending(LocalDateTime.now())
+                .build();
+
+        messageService.save(message);
+
+        return ResponseEntity.ok(HttpStatus.OK);
     }
 
     @ExceptionHandler

@@ -24,6 +24,10 @@ public class MessageService {
         return messageRepository.findAllBySenderAndRecipient(sender, recipient);
     }
 
+    public void save(Message message) {
+        messageRepository.save(message);
+    }
+
     public MessageDTO convertToMessageDTO(Message message) {
         MessageDTO messageDTO = modelMapper.map(message, MessageDTO.class);
         messageDTO.setSender(userService.convertToUserDTO(message.getSender()));
