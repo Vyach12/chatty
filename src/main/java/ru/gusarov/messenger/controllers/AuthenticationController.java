@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.gusarov.messenger.services.AuthenticationService;
-import ru.gusarov.messenger.utils.AuthenticationRequest;
-import ru.gusarov.messenger.utils.AuthenticationResponse;
-import ru.gusarov.messenger.utils.RegisterRequest;
+import ru.gusarov.messenger.utils.auth.AuthenticationRequest;
+import ru.gusarov.messenger.utils.auth.AuthenticationResponse;
+import ru.gusarov.messenger.utils.auth.RegisterRequest;
 
 @RestController
 @RequestMapping("/api/v1/auth")

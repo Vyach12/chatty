@@ -1,4 +1,4 @@
-package ru.gusarov.messenger.utils;
+package ru.gusarov.messenger.utils.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegisterRequest {
-    private String username;
-    private String password;
+public class AuthenticationResponse {
+    private String token;
+    
 }

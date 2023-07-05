@@ -1,0 +1,33 @@
+package ru.gusarov.messenger.services;
+
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+import ru.gusarov.messenger.dto.MessageDTO;
+import ru.gusarov.messenger.models.Message;
+import ru.gusarov.messenger.models.User;
+import ru.gusarov.messenger.repositories.MessageRepository;
+import ru.gusarov.messenger.utils.UserException;
+
+import java.util.Optional;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class MessageService {
+
+    private final ModelMapper modelMapper;
+    private final MessageRepository messageRepository;
+    private final UserService userService;
+
+    public List<Message> findMessagesBySenderAndRecipient(User sender, User recipient) {
+        return messageRepository.findAllBySenderAndRecipient(sender, recipient);
+    }
+
+    public MessageDTO convertToMessageDTO(Message message) {
+        MessageDTO messageDTO = modelMapper.map(message, MessageDTO.class);
+        messageDTO.setSender(userService.convertToUserDTO(message.getSender()));
+        messageDTO.setRecipient(userService.convertToUserDTO(message.getRecipient()));
+        return messageDTO;
+    }
+}

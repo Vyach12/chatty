@@ -1,31 +1,29 @@
-
 package ru.gusarov.messenger.services;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import ru.gusarov.messenger.dto.UserDTO;
 import ru.gusarov.messenger.models.User;
 import ru.gusarov.messenger.repositories.UserRepository;
-
-import java.util.Optional;
+import ru.gusarov.messenger.utils.UserException;
 
 @Service
-public class UserService implements UserDetailsService {
+@RequiredArgsConstructor
+public class UserService {
+    private final ModelMapper modelMapper;
     private final UserRepository userRepository;
 
-    @Autowired
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public User findByUsername(String username){
+        return userRepository.findByUsername(username)
+                .orElseThrow(
+                        ()-> new UserException("User this name: " + username + " does not exist")
+                );
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> user = userRepository.findByUsername(username);
-        if(user.isEmpty()) {
-            throw new UsernameNotFoundException("User not found");
-        }
-        return user.get();
+    public UserDTO convertToUserDTO(User user) {
+        UserDTO userDTO = modelMapper.map(user, UserDTO.class);
+        userDTO.setRole(user.getRole().getName());
+        return userDTO;
     }
 }

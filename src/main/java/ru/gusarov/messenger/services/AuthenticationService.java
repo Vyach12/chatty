@@ -6,16 +6,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.gusarov.messenger.config.JwtService;
-import ru.gusarov.messenger.models.Role;
 import ru.gusarov.messenger.models.User;
 import ru.gusarov.messenger.repositories.RoleRepository;
 import ru.gusarov.messenger.repositories.UserRepository;
-import ru.gusarov.messenger.utils.AuthenticationRequest;
-import ru.gusarov.messenger.utils.AuthenticationResponse;
-import ru.gusarov.messenger.utils.RegisterRequest;
-
-import java.util.Arrays;
-import java.util.Collections;
+import ru.gusarov.messenger.utils.auth.AuthenticationRequest;
+import ru.gusarov.messenger.utils.auth.AuthenticationResponse;
+import ru.gusarov.messenger.utils.auth.RegisterRequest;
 
 @Service
 @RequiredArgsConstructor
