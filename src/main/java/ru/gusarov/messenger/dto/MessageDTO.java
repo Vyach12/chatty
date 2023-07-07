@@ -17,8 +17,8 @@ import java.time.LocalDateTime;
 public class MessageDTO {
     private int id;
     private String message;
-    private UserDTO sender;
-    private UserDTO recipient;
+    private UserForMessageDTO sender;
+    private UserForMessageDTO recipient;
     private LocalDateTime dateOfSending;
     private LocalDateTime dateOfChange;
 }

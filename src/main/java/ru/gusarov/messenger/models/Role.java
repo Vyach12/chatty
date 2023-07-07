@@ -17,7 +17,6 @@ import java.util.List;
 @Table(name = "roles")
 public class Role implements GrantedAuthority {
     @Id
-    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
@@ -25,7 +24,7 @@ public class Role implements GrantedAuthority {
     @OneToMany(mappedBy = "role")
     private List<User> users;
 
-    @Column(name = "name")
+    @Column(name = "name", unique = true, nullable = false)
     private String name;
 
     @Override

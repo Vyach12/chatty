@@ -4,9 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import ru.gusarov.messenger.dto.UserDTO;
+import ru.gusarov.messenger.dto.UserForMessageDTO;
 import ru.gusarov.messenger.models.User;
 import ru.gusarov.messenger.repositories.UserRepository;
 import ru.gusarov.messenger.utils.UserException;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -16,9 +19,15 @@ public class UserService {
 
     public User findByUsername(String username){
         return userRepository.findByUsername(username)
-                .orElseThrow(
-                        ()-> new UserException("User this name: " + username + " does not exist")
-                );
+                .orElseThrow(() -> new UserException("User with name " + username + " does not exist"));
+    }
+
+    public void save(User user) {
+        userRepository.save(user);
+    }
+
+    public UserForMessageDTO convertToUserForMessageDTO(User user) {
+        return modelMapper.map(user, UserForMessageDTO.class);
     }
 
     public UserDTO convertToUserDTO(User user) {

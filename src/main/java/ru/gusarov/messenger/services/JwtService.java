@@ -1,4 +1,4 @@
-package ru.gusarov.messenger.config;
+package ru.gusarov.messenger.services;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

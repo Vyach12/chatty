@@ -7,6 +7,7 @@ import ru.gusarov.messenger.dto.MessageDTO;
 import ru.gusarov.messenger.models.Message;
 import ru.gusarov.messenger.models.User;
 import ru.gusarov.messenger.repositories.MessageRepository;
+import ru.gusarov.messenger.utils.MessageException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,7 +25,7 @@ public class MessageService {
     }
 
     public Message findById(int id) {
-        return messageRepository.findById(id).orElseThrow();
+        return messageRepository.findById(id).orElseThrow(() -> new MessageException("Message with id = " + id + " does not exist"));
     }
 
     public void save(Message message) {
@@ -39,8 +40,8 @@ public class MessageService {
 
     public MessageDTO convertToMessageDTO(Message message) {
         MessageDTO messageDTO = modelMapper.map(message, MessageDTO.class);
-        messageDTO.setSender(userService.convertToUserDTO(message.getSender()));
-        messageDTO.setRecipient(userService.convertToUserDTO(message.getRecipient()));
+        messageDTO.setSender(userService.convertToUserForMessageDTO(message.getSender()));
+        messageDTO.setRecipient(userService.convertToUserForMessageDTO(message.getRecipient()));
         return messageDTO;
     }
 }
