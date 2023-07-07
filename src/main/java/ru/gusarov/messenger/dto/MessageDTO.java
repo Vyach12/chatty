@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class MessageDTO {
+    private int id;
     private String message;
     private UserDTO sender;
     private UserDTO recipient;

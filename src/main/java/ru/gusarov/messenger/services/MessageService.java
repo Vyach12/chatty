@@ -7,9 +7,8 @@ import ru.gusarov.messenger.dto.MessageDTO;
 import ru.gusarov.messenger.models.Message;
 import ru.gusarov.messenger.models.User;
 import ru.gusarov.messenger.repositories.MessageRepository;
-import ru.gusarov.messenger.utils.UserException;
 
-import java.util.Optional;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -24,7 +23,17 @@ public class MessageService {
         return messageRepository.findAllBySenderAndRecipient(sender, recipient);
     }
 
+    public Message findById(int id) {
+        return messageRepository.findById(id).orElseThrow();
+    }
+
     public void save(Message message) {
+        messageRepository.save(message);
+    }
+
+    public void update(Message message, String newText) {
+        message.setDateOfChange(LocalDateTime.now());
+        message.setMessage(newText);
         messageRepository.save(message);
     }
 

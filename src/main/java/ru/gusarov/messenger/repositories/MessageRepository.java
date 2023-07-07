@@ -1,6 +1,7 @@
 package ru.gusarov.messenger.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import ru.gusarov.messenger.models.Message;
 import ru.gusarov.messenger.models.User;
 
