@@ -7,9 +7,8 @@ import ru.gusarov.messenger.dto.UserDTO;
 import ru.gusarov.messenger.dto.UserForMessageDTO;
 import ru.gusarov.messenger.models.User;
 import ru.gusarov.messenger.repositories.UserRepository;
-import ru.gusarov.messenger.utils.UserException;
+import ru.gusarov.messenger.util.UserException;
 
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -17,9 +16,17 @@ public class UserService {
     private final ModelMapper modelMapper;
     private final UserRepository userRepository;
 
-    public User findByUsername(String username){
+    public User findByUsername(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserException("User with name " + username + " does not exist"));
+    }
+
+    public boolean existByUsername(String username) {
+        return userRepository.existsByUsername(username);
+    }
+
+    public boolean existByEmail(String email) {
+        return userRepository.existsByEmail(email);
     }
 
     public void save(User user) {

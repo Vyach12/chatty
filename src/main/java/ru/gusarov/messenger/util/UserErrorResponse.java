@@ -1,11 +1,11 @@
-package ru.gusarov.messenger.utils;
+package ru.gusarov.messenger.util;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class MessageErrorResponse {
+public class UserErrorResponse {
     private String message;
     private long timestamp;
 }

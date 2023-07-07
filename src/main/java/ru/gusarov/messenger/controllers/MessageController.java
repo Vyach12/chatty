@@ -11,10 +11,10 @@ import ru.gusarov.messenger.models.Message;
 import ru.gusarov.messenger.models.User;
 import ru.gusarov.messenger.services.MessageService;
 import ru.gusarov.messenger.services.UserService;
-import ru.gusarov.messenger.utils.MessageErrorResponse;
-import ru.gusarov.messenger.utils.MessageException;
-import ru.gusarov.messenger.utils.UserErrorResponse;
-import ru.gusarov.messenger.utils.UserException;
+import ru.gusarov.messenger.util.MessageErrorResponse;
+import ru.gusarov.messenger.util.MessageException;
+import ru.gusarov.messenger.util.UserErrorResponse;
+import ru.gusarov.messenger.util.UserException;
 
 import java.time.LocalDateTime;
 import java.util.List;

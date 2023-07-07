@@ -7,7 +7,7 @@ import ru.gusarov.messenger.dto.MessageDTO;
 import ru.gusarov.messenger.models.Message;
 import ru.gusarov.messenger.models.User;
 import ru.gusarov.messenger.repositories.MessageRepository;
-import ru.gusarov.messenger.utils.MessageException;
+import ru.gusarov.messenger.util.MessageException;
 
 import java.time.LocalDateTime;
 import java.util.List;

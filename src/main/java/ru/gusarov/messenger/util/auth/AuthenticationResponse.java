@@ -1,4 +1,4 @@
-package ru.gusarov.messenger.utils.auth;
+package ru.gusarov.messenger.util.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,4 +1,4 @@
-package ru.gusarov.messenger.utils;
+package ru.gusarov.messenger.util;
 
 public class UserException extends RuntimeException {
     public UserException(String message) {

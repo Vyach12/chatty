@@ -1,15 +1,17 @@
 package ru.gusarov.messenger.services;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.gusarov.messenger.models.User;
-import ru.gusarov.messenger.utils.auth.AuthenticationRequest;
-import ru.gusarov.messenger.utils.auth.AuthenticationResponse;
-import ru.gusarov.messenger.utils.auth.RegisterRequest;
+import ru.gusarov.messenger.util.auth.AuthenticationRequest;
+import ru.gusarov.messenger.util.auth.AuthenticationResponse;
+import ru.gusarov.messenger.util.auth.RegisterRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +33,11 @@ public class AuthenticationService {
                 .role(roleService.findByName("ROLE_USER"))
                 .build();
 
-        userService.save(user);
+        try {
+            userService.save(user);
+        } catch (DuplicateKeyException e) {
+            throw new RuntimeException("Username or email already exists");
+        }
 
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
@@ -40,12 +46,16 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        request.getPassword()
-                )
-        );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getUsername(),
+                            request.getPassword()
+                    )
+            );
+        } catch (AuthenticationException e) {
+            throw new UsernameNotFoundException("Invalid username or password");
+        }
         var user = userService.findByUsername(request.getUsername());
 
         var jwtToken = jwtService.generateToken(user);

@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.gusarov.messenger.dto.UserDTO;
 import ru.gusarov.messenger.services.UserService;
-import ru.gusarov.messenger.utils.UserException;
 
 
 @RestController

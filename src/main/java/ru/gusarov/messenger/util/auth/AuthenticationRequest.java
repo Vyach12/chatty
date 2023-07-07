@@ -1,5 +1,6 @@
-package ru.gusarov.messenger.utils.auth;
+package ru.gusarov.messenger.util.auth;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,6 +11,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuthenticationRequest {
+
+    @NotNull
     private String username;
+    @NotNull
     public String password;
 }
