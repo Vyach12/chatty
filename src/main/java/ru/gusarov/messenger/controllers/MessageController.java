@@ -59,9 +59,8 @@ public class MessageController {
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    @PatchMapping("/{username}")
+    @PatchMapping
     public ResponseEntity<HttpStatus> changeMessage(
-            @PathVariable String username,
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody MessageDTO messageDTO
     ) {

@@ -21,6 +21,12 @@ public class UserService {
                 .orElseThrow(() -> new UserException("User with name " + username + " does not exist"));
     }
 
+    public void changeEnabled(String username) {
+        User user = findByUsername(username);
+        user.setEnabled(!user.isEnabled());
+        save(user);
+    }
+
     public boolean existByUsername(String username) {
         return userRepository.existsByUsername(username);
     }

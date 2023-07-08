@@ -27,6 +27,9 @@ public class MessageService {
         list.sort(Comparator.comparing(Message::getDateOfSending));
         return list;
     }
+    public List<Message> findMessagesByUser(User user) {
+        return messageRepository.findAllBySenderOrRecipient(user, user);
+    }
 
     public Message findById(int id) {
         return messageRepository.findById(id)

@@ -1,15 +1,10 @@
 package ru.gusarov.messenger.models;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Data
@@ -30,7 +25,6 @@ public class User implements UserDetails {
     private String password;
 
     @Column(name = "email", unique = true, nullable = false)
-    @Email
     private String email;
     @Column(name = "date_of_birth", nullable = false)
     private Date dateOfBirth;
