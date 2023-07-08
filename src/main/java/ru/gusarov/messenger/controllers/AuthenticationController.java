@@ -62,15 +62,10 @@ public class AuthenticationController {
             throw new AuthException("User with username " + request.getUsername() + " does not exist");
         }
 
-        return ResponseEntity.ok(service.authenticate(request));
-    }
+        if(!userService.isEnabled(request.getUsername())) {
+            throw new AuthException("User with username " + request.getUsername() + " is banned");
+        }
 
-    @ExceptionHandler
-    private ResponseEntity<AuthErrorResponse> handleException(AuthException e) {
-        AuthErrorResponse response = new AuthErrorResponse(
-                e.getMessage(),
-                System.currentTimeMillis()
-        );
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return ResponseEntity.ok(service.authenticate(request));
     }
 }

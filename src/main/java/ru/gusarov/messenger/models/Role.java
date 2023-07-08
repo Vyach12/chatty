@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder
@@ -15,20 +16,17 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "roles")
-public class Role implements GrantedAuthority {
+public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Transient
-    @OneToMany(mappedBy = "role")
-    private List<User> users;
-
     @Column(name = "name", unique = true, nullable = false)
     private String name;
 
-    @Override
-    public String getAuthority() {
-        return name;
-    }
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "role_settings",
+            joinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "privilege_id", referencedColumnName = "id"))
+    private Set<Privilege> privileges;
 }

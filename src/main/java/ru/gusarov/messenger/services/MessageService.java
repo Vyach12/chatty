@@ -10,6 +10,7 @@ import ru.gusarov.messenger.repositories.MessageRepository;
 import ru.gusarov.messenger.util.MessageException;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -20,12 +21,18 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final UserService userService;
 
-    public List<Message> findMessagesBySenderAndRecipient(User sender, User recipient) {
-        return messageRepository.findAllBySenderAndRecipient(sender, recipient);
+    public List<Message> findMessagesByPeople(User first, User second) {
+        List<Message> list = messageRepository.findAllBySenderAndRecipient(first, second);
+        list.addAll(messageRepository.findAllBySenderAndRecipient(second, first));
+        list.sort(Comparator.comparing(Message::getDateOfSending));
+        return list;
     }
 
     public Message findById(int id) {
-        return messageRepository.findById(id).orElseThrow(() -> new MessageException("Message with id = " + id + " does not exist"));
+        return messageRepository.findById(id)
+                .orElseThrow(
+                        () -> new MessageException("Message with id = " + id + " does not exist")
+                );
     }
 
     public void save(Message message) {

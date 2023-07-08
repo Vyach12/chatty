@@ -29,6 +29,10 @@ public class UserService {
         return userRepository.existsByEmail(email);
     }
 
+    public boolean isEnabled(String username) {
+        return findByUsername(username).isEnabled();
+    }
+
     public void save(User user) {
         userRepository.save(user);
     }

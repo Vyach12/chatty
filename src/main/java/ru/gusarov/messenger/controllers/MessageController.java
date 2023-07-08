@@ -11,10 +11,7 @@ import ru.gusarov.messenger.models.Message;
 import ru.gusarov.messenger.models.User;
 import ru.gusarov.messenger.services.MessageService;
 import ru.gusarov.messenger.services.UserService;
-import ru.gusarov.messenger.util.MessageErrorResponse;
 import ru.gusarov.messenger.util.MessageException;
-import ru.gusarov.messenger.util.UserErrorResponse;
-import ru.gusarov.messenger.util.UserException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,7 +33,7 @@ public class MessageController {
         User sender = userService.findByUsername(userDetails.getUsername());
 
         List<MessageDTO> list = messageService
-                .findMessagesBySenderAndRecipient(sender, recipient).stream()
+                .findMessagesByPeople(sender, recipient).stream()
                 .map(messageService::convertToMessageDTO)
                 .toList();
         return ResponseEntity.ok(list);
@@ -79,23 +76,5 @@ public class MessageController {
         );
 
         return ResponseEntity.ok(HttpStatus.OK);
-    }
-
-    @ExceptionHandler
-    private ResponseEntity<UserErrorResponse> handleException(UserException e) {
-        UserErrorResponse response = new UserErrorResponse(
-                e.getMessage(),
-                System.currentTimeMillis()
-        );
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler
-    private ResponseEntity<MessageErrorResponse> handleException(MessageException e) {
-        MessageErrorResponse response = new MessageErrorResponse(
-                e.getMessage(),
-                System.currentTimeMillis()
-        );
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 }
