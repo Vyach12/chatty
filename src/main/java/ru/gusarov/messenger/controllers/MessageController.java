@@ -28,7 +28,6 @@ public class MessageController {
             @PathVariable String username,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-
         User recipient = userService.findByUsername(username);
         User sender = userService.findByUsername(userDetails.getUsername());
 
@@ -43,7 +42,8 @@ public class MessageController {
     public ResponseEntity<HttpStatus> sendMessage(
             @PathVariable String username,
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody String textMessage) {
+            @RequestBody String textMessage
+    ) {
         User recipient = userService.findByUsername(username);
         User sender = userService.findByUsername(userDetails.getUsername());
 
@@ -64,7 +64,6 @@ public class MessageController {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody MessageDTO messageDTO
     ) {
-
         if(!messageDTO.getSender().getUsername().equals(userDetails.getUsername())) {
             throw new MessageException("You cant change message");
         }

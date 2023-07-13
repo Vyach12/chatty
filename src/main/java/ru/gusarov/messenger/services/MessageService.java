@@ -27,15 +27,10 @@ public class MessageService {
         list.sort(Comparator.comparing(Message::getDateOfSending));
         return list;
     }
-    public List<Message> findMessagesByUser(User user) {
-        return messageRepository.findAllBySenderOrRecipient(user, user);
-    }
 
     public Message findById(int id) {
         return messageRepository.findById(id)
-                .orElseThrow(
-                        () -> new MessageException("Message with id = " + id + " does not exist")
-                );
+                .orElseThrow(() -> new MessageException("Message with id = " + id + " does not exist"));
     }
 
     public void save(Message message) {

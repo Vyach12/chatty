@@ -32,7 +32,13 @@ create table if not exists messages(
     message varchar not null,
     date_of_sending timestamp not null,
     date_of_change timestamp
-    );
+);
+
+create table if not exists tokens(
+    id serial primary key,
+    token varchar unique not null,
+    user_id int references _users(id) not null
+);
 
 INSERT INTO roles(name) VALUES ('ROLE_USER');
 INSERT INTO roles(name) VALUES ('ROLE_ADMIN');

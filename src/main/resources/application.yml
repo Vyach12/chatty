@@ -5,9 +5,19 @@ spring:
     password: Qwe2qwe2
     driver-class-name: org.postgresql.Driver
   jpa:
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+application:
+  security:
+    jwt:
+      access-token:
+        secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+        expiration: 240000 # a 4 minutes
+      refresh-token:
+        secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+        expiration: 604800000 # 7 days

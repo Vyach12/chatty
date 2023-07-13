@@ -37,6 +37,9 @@ public class User implements UserDetails {
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
+    @OneToMany(mappedBy = "user")
+    private List<Token> tokens;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return new HashSet<GrantedAuthority>(role.getPrivileges());

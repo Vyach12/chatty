@@ -1,14 +1,16 @@
 package ru.gusarov.messenger.controllers;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import ru.gusarov.messenger.models.User;
 import ru.gusarov.messenger.services.AuthenticationService;
+import ru.gusarov.messenger.services.TokenService;
 import ru.gusarov.messenger.services.UserService;
-import ru.gusarov.messenger.util.AuthErrorResponse;
 import ru.gusarov.messenger.util.AuthException;
 import ru.gusarov.messenger.util.auth.AuthenticationRequest;
 import ru.gusarov.messenger.util.auth.AuthenticationResponse;
@@ -21,14 +23,16 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AuthenticationController {
 
-    private final AuthenticationService service;
+    private final AuthenticationService authService;
     private final UserService userService;
+    private final TokenService tokenService;
 
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(
-            @Valid @RequestBody RegisterRequest request,
+            @Valid @RequestBody RegisterRequest authRequest,
+            HttpServletResponse response,
             BindingResult bindingResult
-    ){
+    ) {
         if (bindingResult.hasErrors()) {
             String errors = bindingResult.getFieldErrors().stream()
                     .map(error -> error.getField() + ": " + error.getDefaultMessage())
@@ -36,19 +40,24 @@ public class AuthenticationController {
             throw new AuthException(errors);
         }
 
-        if (userService.existByUsername(request.getUsername())) {
-            throw new AuthException("User with username " + request.getUsername() + " already exist");
+        if (userService.existByUsername(authRequest.getUsername())) {
+            throw new AuthException("User with username " + authRequest.getUsername() + " already exist");
         }
 
-        if (userService.existByEmail(request.getEmail())) {
-            throw new AuthException("User with email " + request.getEmail() + " already exist");
+        if (userService.existByEmail(authRequest.getEmail())) {
+            throw new AuthException("User with email " + authRequest.getEmail() + " already exist");
         }
-        return ResponseEntity.ok(service.register(request));
+
+        User user = authService.register(authRequest);
+        String accessToken = tokenService.createTokens(response, user);
+
+        return ResponseEntity.ok(new AuthenticationResponse(accessToken));
     }
 
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> authenticate(
-            @Valid @RequestBody AuthenticationRequest request,
+            @Valid @RequestBody AuthenticationRequest authRequest,
+            HttpServletResponse response,
             BindingResult bindingResult
     ){
         if (bindingResult.hasErrors()) {
@@ -58,14 +67,26 @@ public class AuthenticationController {
             throw new AuthException(errors);
         }
 
-        if (!userService.existByUsername(request.getUsername())) {
-            throw new AuthException("User with username " + request.getUsername() + " does not exist");
+        if (!userService.existByUsername(authRequest.getUsername())) {
+            throw new AuthException("User with username " + authRequest.getUsername() + " does not exist");
         }
 
-        if(!userService.isEnabled(request.getUsername())) {
-            throw new AuthException("User with username " + request.getUsername() + " is banned");
+        if(!userService.isEnabled(authRequest.getUsername())) {
+            throw new AuthException("User with username " + authRequest.getUsername() + " is banned");
         }
 
-        return ResponseEntity.ok(service.authenticate(request));
+        User user = authService.authenticate(authRequest);
+        String accessToken = tokenService.createTokens(response, user);
+
+        return ResponseEntity.ok(new AuthenticationResponse(accessToken));
+    }
+
+    @GetMapping("/refresh")
+    public ResponseEntity<AuthenticationResponse> refresh(HttpServletRequest request, HttpServletResponse response) {
+        return ResponseEntity.ok(
+                new AuthenticationResponse(
+                        tokenService.refresh(request, response)
+                )
+        );
     }
 }

@@ -32,7 +32,6 @@ public class UserController {
             @RequestBody UpdatedUsernameDTO updatedUsernameDTO,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        System.out.println(updatedUsernameDTO.getUsername());
         if(userService.existByUsername(updatedUsernameDTO.getUsername())) {
             throw new UserException(
                     "Person with username " + updatedUsernameDTO.getUsername() + " already exist"
