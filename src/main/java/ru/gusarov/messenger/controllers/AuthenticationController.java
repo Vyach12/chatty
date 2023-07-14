@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +29,7 @@ public class AuthenticationController {
     private final TokenService tokenService;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> register(
+    public ResponseEntity<HttpStatus> register(
             @Valid @RequestBody RegisterRequest authRequest,
             HttpServletResponse response,
             BindingResult bindingResult
@@ -48,14 +49,15 @@ public class AuthenticationController {
             throw new AuthException("User with email " + authRequest.getEmail() + " already exist");
         }
 
-        User user = authService.register(authRequest);
-        String accessToken = tokenService.createTokens(response, user);
+        tokenService.updateTokens(
+                response, authService.register(authRequest)
+        );
 
-        return ResponseEntity.ok(new AuthenticationResponse(accessToken));
+        return ResponseEntity.ok(HttpStatus.OK);
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<AuthenticationResponse> authenticate(
+    public ResponseEntity<HttpStatus> authenticate(
             @Valid @RequestBody AuthenticationRequest authRequest,
             HttpServletResponse response,
             BindingResult bindingResult
@@ -75,18 +77,16 @@ public class AuthenticationController {
             throw new AuthException("User with username " + authRequest.getUsername() + " is banned");
         }
 
-        User user = authService.authenticate(authRequest);
-        String accessToken = tokenService.createTokens(response, user);
+        tokenService.updateTokens(
+                response, authService.authenticate(authRequest)
+        );
 
-        return ResponseEntity.ok(new AuthenticationResponse(accessToken));
+        return ResponseEntity.ok(HttpStatus.OK);
     }
 
     @GetMapping("/refresh")
-    public ResponseEntity<AuthenticationResponse> refresh(HttpServletRequest request, HttpServletResponse response) {
-        return ResponseEntity.ok(
-                new AuthenticationResponse(
-                        tokenService.refresh(request, response)
-                )
-        );
+    public ResponseEntity<HttpStatus> refresh(HttpServletRequest request, HttpServletResponse response) {
+        tokenService.refresh(request, response);
+        return ResponseEntity.ok(HttpStatus.OK);
     }
 }

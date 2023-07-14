@@ -18,6 +18,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import ru.gusarov.messenger.services.TokenService;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -35,13 +36,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
 
-        String accessToken  = tokenService.resolveJWTFromRequest(request);
         try {
-            String username = tokenService.extractUsername(accessToken);
+            Optional<String> accessToken  = tokenService.resolveJWTFromRequest(request);
+            if(accessToken.isEmpty()) {
+                return;
+            }
+            String username = tokenService.extractUsername(accessToken.get());
 
             if(username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                if (tokenService.isTokenValid(accessToken, userDetails)) {
+                if (tokenService.isTokenValid(accessToken.get(), userDetails)) {
                     Authentication authentication = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
@@ -51,11 +55,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 }
             }
 
-        } catch (ExpiredJwtException | SignatureException e) {
-            accessToken = tokenService.refresh(request, response);
-            response.addHeader(AUTH_HEADER_NAME, AUTH_HEADER_START + accessToken);
+        } catch (ExpiredJwtException | SignatureException | IllegalArgumentException e) {
+            try {
+                tokenService.refresh(request, response);
+            } catch (ExpiredJwtException | SignatureException | IllegalArgumentException exception) {
+                System.out.println("ssssssssssssssssssss");
+            }
+        } finally {
+            filterChain.doFilter(request, response);
         }
-
-        filterChain.doFilter(request, response);
     }
 }

@@ -41,13 +41,16 @@ public class AuthenticationService {
     public User authenticate(AuthenticationRequest request) {
         User user;
         try {
+            System.out.println("aaaaaaaaaaaaaaaa");
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             request.getUsername(),
                             request.getPassword()
                     )
             );
+            System.out.println("aaaaaaaaaaaaaaaa");
             user = userService.findByUsername(request.getUsername());
+            System.out.println("aaaaaaaaaaaaaaaa");
         } catch (AuthenticationException e) {
             throw new UserException("Invalid username or password");
         }

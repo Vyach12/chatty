@@ -36,9 +36,9 @@ public class TokenService {
     private String secretRefresh;
 
     @Value("${application.security.jwt.access-token.expiration}")
-    private int jwtExpiration;
+    private int accessExpirationTimeMs;
     @Value("${application.security.jwt.refresh-token.expiration}")
-    private int refreshExpiration;
+    private int refreshExpirationTimeMs;
 
     private final UserDetailsService userDetailsService;
     private final TokenRepository tokenRepository;
@@ -64,21 +64,22 @@ public class TokenService {
         return tokenRepository.findByToken(refreshToken);
     }
 
-    public String createTokens(HttpServletResponse response, User user) {
+    public void updateTokens(HttpServletResponse response, User user) {
         String refreshToken = generateRefreshToken(user);
         save(user, refreshToken);
 
         response.addCookie(
-                createCookieRefreshToken(
-                        refreshToken
-                )
+                createCookieRefreshToken(refreshToken)
         );
+        response.addHeader(AUTH_HEADER_NAME, AUTH_HEADER_START + generateAccessToken(user));    }
 
-        return generateAccessToken(user);
-    }
+    public void refresh(HttpServletRequest request, HttpServletResponse response) {
+        Optional<String> refreshTokenOptional = resolveTokenFromCookies(request);
+        if(refreshTokenOptional.isEmpty()) {
+            return;
+        }
+        String refreshToken = refreshTokenOptional.get();
 
-    public String refresh(HttpServletRequest request, HttpServletResponse response) {
-        String refreshToken = resolveTokenFromCookies(request);
         String username = extractUsername(refreshToken);
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
@@ -94,44 +95,41 @@ public class TokenService {
             storedToken.get().setToken(refreshToken);
 
             save(storedToken.get());
-            return accessToken;
         }
-        return null;
     }
 
     private Cookie createCookieRefreshToken(String refreshToken) {
         Cookie cookie = new Cookie(REFRESH_TOKEN_NAME, refreshToken);
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
-        cookie.setMaxAge(refreshExpiration);
+        cookie.setMaxAge(refreshExpirationTimeMs);
         cookie.setPath("/");
 
         return cookie;
     }
 
-    public String resolveTokenFromCookies(HttpServletRequest request) {
+    public Optional<String> resolveTokenFromCookies(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         return Arrays.stream(cookies)
                 .filter(cookie -> cookie.getName().equals(REFRESH_TOKEN_NAME))
                 .map(Cookie::getValue)
-                .findFirst()
-                .orElse(null);
+                .findFirst();
     }
 
-    public String resolveJWTFromRequest(HttpServletRequest request) {
+    public Optional<String> resolveJWTFromRequest(HttpServletRequest request) {
         String authHeader = request.getHeader(AUTH_HEADER_NAME);
         if (authHeader == null ||!authHeader.startsWith(AUTH_HEADER_START)) {
-            return null;
+            return Optional.empty();
         }
-        return authHeader.substring(JWT_START_POSITION);
+        return Optional.of(authHeader.substring(JWT_START_POSITION));
     }
 
     public String generateAccessToken(UserDetails userDetails) {
-        return buildToken(new HashMap<>(), userDetails, secretAccess, jwtExpiration);
+        return buildToken(new HashMap<>(), userDetails, secretAccess, accessExpirationTimeMs);
     }
 
     public String generateRefreshToken(UserDetails userDetails) {
-        return buildToken(new HashMap<>(), userDetails, secretRefresh, refreshExpiration);
+        return buildToken(new HashMap<>(), userDetails, secretRefresh, refreshExpirationTimeMs);
     }
 
     private String buildToken(

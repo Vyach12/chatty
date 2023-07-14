@@ -8,6 +8,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class LogoutService implements LogoutHandler {
@@ -19,11 +21,13 @@ public class LogoutService implements LogoutHandler {
             Authentication authentication
     ) {
 
-        final String refreshToken = tokenService.resolveTokenFromCookies(request);
-        var storedToken = tokenService.findByToken(refreshToken);
-        if (storedToken.isPresent()) {
-            tokenService.delete(storedToken.get());
-            SecurityContextHolder.clearContext();
+        final Optional<String> refreshToken = tokenService.resolveTokenFromCookies(request);
+        if(refreshToken.isPresent()) {
+            var storedToken = tokenService.findByToken(refreshToken.get());
+            if (storedToken.isPresent()) {
+                tokenService.delete(storedToken.get());
+                SecurityContextHolder.clearContext();
+            }
         }
     }
 }
