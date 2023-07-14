@@ -3,15 +3,17 @@ package ru.gusarov.messenger.services;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-import ru.gusarov.messenger.dto.MessageDTO;
+import ru.gusarov.messenger.util.dto.errors.logic.ErrorCode;
+import ru.gusarov.messenger.util.dto.message.MessageDTO;
 import ru.gusarov.messenger.models.Message;
 import ru.gusarov.messenger.models.User;
 import ru.gusarov.messenger.repositories.MessageRepository;
-import ru.gusarov.messenger.util.MessageException;
+import ru.gusarov.messenger.util.exceptions.message.MessageNotFoundException;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,19 +30,23 @@ public class MessageService {
         return list;
     }
 
-    public Message findById(int id) {
-        return messageRepository.findById(id)
-                .orElseThrow(() -> new MessageException("Message with id = " + id + " does not exist"));
-    }
-
     public void save(Message message) {
         messageRepository.save(message);
     }
 
-    public void update(Message message, String newText) {
-        message.setDateOfChange(LocalDateTime.now());
-        message.setMessage(newText);
-        messageRepository.save(message);
+    public void update(int idMessage, String newText) {
+        Optional<Message> message = messageRepository.findById(idMessage);
+        if(message.isEmpty()) {
+            throw MessageNotFoundException.builder()
+                    .errorCode(ErrorCode.MESSAGE_NOT_FOUND)
+                    .errorDate(LocalDateTime.now())
+                    .dataCausedError(idMessage)
+                    .errorMessage("Message with id = " + idMessage + " does not exist")
+                    .build();
+        }
+        message.get().setDateOfChange(LocalDateTime.now());
+        message.get().setMessage(newText);
+        messageRepository.save(message.get());
     }
 
     public MessageDTO convertToMessageDTO(Message message) {

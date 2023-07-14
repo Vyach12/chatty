@@ -16,16 +16,16 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import ru.gusarov.messenger.services.TokenService;
+import ru.gusarov.messenger.util.dto.errors.logic.ErrorCode;
+import ru.gusarov.messenger.util.exceptions.authentication.NotAuthorizedException;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
-
-    private static final String AUTH_HEADER_NAME = "Authorization";
-    private static final String AUTH_HEADER_START = "Bearer ";
     private final UserDetailsService userDetailsService;
     private final TokenService tokenService;
 
@@ -35,10 +35,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
+        if (request.getServletPath().contains("/api/v1/auth")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         try {
             Optional<String> accessToken  = tokenService.resolveJWTFromRequest(request);
             if(accessToken.isEmpty()) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
             String username = tokenService.extractUsername(accessToken.get());
@@ -54,12 +59,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             }
-
         } catch (ExpiredJwtException | SignatureException | IllegalArgumentException e) {
             try {
                 tokenService.refresh(request, response);
             } catch (ExpiredJwtException | SignatureException | IllegalArgumentException exception) {
-                System.out.println("ssssssssssssssssssss");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             }
         } finally {
             filterChain.doFilter(request, response);

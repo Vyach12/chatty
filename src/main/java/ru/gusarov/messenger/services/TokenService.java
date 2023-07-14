@@ -43,15 +43,6 @@ public class TokenService {
     private final UserDetailsService userDetailsService;
     private final TokenRepository tokenRepository;
 
-    public void save(User user, String refreshToken) {
-        tokenRepository.save(
-                Token.builder()
-                        .token(refreshToken)
-                        .user(user)
-                        .build()
-        );
-    }
-
     public void save(Token storedToken) {
         tokenRepository.save(storedToken);
     }
@@ -132,6 +123,21 @@ public class TokenService {
         return buildToken(new HashMap<>(), userDetails, secretRefresh, refreshExpirationTimeMs);
     }
 
+    private void save(User user, String refreshToken) {
+        tokenRepository.save(
+                Token.builder()
+                        .token(refreshToken)
+                        .user(user)
+                        .build()
+        );
+    }
+
+    public boolean isTokenValid(String token, UserDetails userDetails) {
+        final String username = extractUsername(token);
+        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    }
+
+
     private String buildToken(
             Map<String, Object> extraClaims,
             UserDetails userDetails,
@@ -147,12 +153,6 @@ public class TokenService {
                 .signWith(getSignInKey(secretKey), SignatureAlgorithm.HS256)
                 .compact();
     }
-
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
-    }
-
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }

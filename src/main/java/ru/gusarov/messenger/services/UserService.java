@@ -3,11 +3,14 @@ package ru.gusarov.messenger.services;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-import ru.gusarov.messenger.dto.UserDTO;
-import ru.gusarov.messenger.dto.UserForMessageDTO;
+import ru.gusarov.messenger.util.dto.errors.logic.ErrorCode;
+import ru.gusarov.messenger.util.dto.user.UserDTO;
+import ru.gusarov.messenger.util.dto.user.UserForMessageDTO;
 import ru.gusarov.messenger.models.User;
 import ru.gusarov.messenger.repositories.UserRepository;
-import ru.gusarov.messenger.util.UserException;
+import ru.gusarov.messenger.util.exceptions.user.UserNotFoundException;
+
+import java.time.LocalDateTime;
 
 
 @Service
@@ -18,7 +21,13 @@ public class UserService {
 
     public User findByUsername(String username) {
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserException("User with name " + username + " does not exist"));
+                .orElseThrow(() -> UserNotFoundException.builder()
+                        .errorCode(ErrorCode.USER_NOT_FOUND)
+                        .errorDate(LocalDateTime.now())
+                        .dataCausedError(username)
+                        .errorMessage("User with username = " + username + " does not exist")
+                        .build()
+                );
     }
 
     public void changeEnabled(String username) {
