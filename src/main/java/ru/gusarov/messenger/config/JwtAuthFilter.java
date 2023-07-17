@@ -16,11 +16,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import ru.gusarov.messenger.services.TokenService;
-import ru.gusarov.messenger.util.dto.errors.logic.ErrorCode;
-import ru.gusarov.messenger.util.exceptions.authentication.NotAuthorizedException;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Component
@@ -28,7 +25,6 @@ import java.util.Optional;
 public class JwtAuthFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
     private final TokenService tokenService;
-
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,

@@ -19,7 +19,6 @@ public class Privilege implements GrantedAuthority {
 
     @Column(name = "name", unique = true, nullable = false)
     private String name;
-
     @Override
     public String getAuthority() {
         return name;

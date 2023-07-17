@@ -19,7 +19,6 @@ public class Role {
 
     @Column(name = "name", unique = true, nullable = false)
     private String name;
-
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "role_settings",
             joinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"),
