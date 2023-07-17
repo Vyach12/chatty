@@ -1,4 +1,4 @@
-package ru.gusarov.messenger.config;
+package ru.gusarov.messenger.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -37,7 +37,7 @@ public class SecurityConfiguration {
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout()
-                .logoutUrl("/api/v1/auth/logout")
+                .logoutUrl("/api/v1/logout")
                 .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext());
         return http.build();
     }
