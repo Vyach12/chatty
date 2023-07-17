@@ -7,27 +7,34 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.WebUtils;
 import ru.gusarov.messenger.models.Token;
 import ru.gusarov.messenger.models.User;
 import ru.gusarov.messenger.repositories.TokenRepository;
+import ru.gusarov.messenger.util.dto.errors.logic.ErrorCode;
+import ru.gusarov.messenger.util.exceptions.token.TokenNotFoundException;
 
 import java.security.Key;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
 public class TokenService {
-    private static final String AUTH_HEADER_NAME = "Authorization";
-    private static final String AUTH_HEADER_START = "Bearer ";
-    private static final int JWT_START_POSITION = AUTH_HEADER_START.length();
-    private static final String REFRESH_TOKEN_NAME = "refresh_token";
+    @Value("${application.http.auth-header-name}")
+    private String authHeaderName;
+
+    @Value("${application.http.auth-header-start}")
+    private String authHeaderStart;
+
+    @Value("${application.http.refresh-token-name}")
+    private  String refreshTokenName;
 
     @Value("${application.security.jwt.access-token.secret-key}")
     private String secretAccess;
@@ -39,97 +46,85 @@ public class TokenService {
     private int accessExpirationTimeMs;
     @Value("${application.security.jwt.refresh-token.expiration}")
     private int refreshExpirationTimeMs;
-
-    private final UserDetailsService userDetailsService;
     private final TokenRepository tokenRepository;
+    private final UserService userService;
 
     public void save(Token storedToken) {
         tokenRepository.save(storedToken);
     }
 
-    public void delete(Token token) {
-        tokenRepository.delete(token);
+    public void delete(String refreshToken) {
+        Optional<Token> token = tokenRepository.findByToken(refreshToken);
+        token.ifPresent(tokenRepository::delete);
     }
 
     public Optional<Token> findByToken(String refreshToken) {
         return tokenRepository.findByToken(refreshToken);
     }
 
-    public void updateTokens(HttpServletResponse response, User user) {
-        String refreshToken = generateRefreshToken(user);
-        save(user, refreshToken);
-
-        response.addCookie(
-                createCookieRefreshToken(refreshToken)
-        );
-        response.addHeader(AUTH_HEADER_NAME, AUTH_HEADER_START + generateAccessToken(user));    }
-
-    public void refresh(HttpServletRequest request, HttpServletResponse response) {
-        Optional<String> refreshTokenOptional = resolveTokenFromCookies(request);
-        if(refreshTokenOptional.isEmpty()) {
-            return;
+    public ResponseCookie refresh(String refreshToken) {
+        Optional<Token> storedToken = findByToken(refreshToken);
+        if(storedToken.isEmpty()) {
+            throw TokenNotFoundException.builder()
+                    .errorCode(ErrorCode.TOKEN_NOT_FOUND)
+                    .errorDate(LocalDateTime.now())
+                    .dataCausedError(refreshToken)
+                    .errorMessage("Token not found")
+                    .build();
         }
-        String refreshToken = refreshTokenOptional.get();
 
         String username = extractUsername(refreshToken);
+        User user = userService.findByUsername(username);
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        Optional<Token> storedToken = findByToken(refreshToken);
-
-        if (storedToken.isPresent() && isTokenValid(refreshToken, userDetails)) {
-            refreshToken = generateRefreshToken(userDetails);
-            String accessToken = generateAccessToken(userDetails);
-
-            response.addCookie(createCookieRefreshToken(refreshToken));
-            response.addHeader(AUTH_HEADER_NAME, AUTH_HEADER_START + accessToken);
-
-            storedToken.get().setToken(refreshToken);
-
-            save(storedToken.get());
+        if (isTokenValid(refreshToken, user)) {
+            tokenRepository.delete(storedToken.get());
+            return generateRefreshTokenCookie(user);
         }
+        return null;
     }
 
-    private Cookie createCookieRefreshToken(String refreshToken) {
-        Cookie cookie = new Cookie(REFRESH_TOKEN_NAME, refreshToken);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setMaxAge(refreshExpirationTimeMs);
-        cookie.setPath("/");
-
-        return cookie;
+    public ResponseCookie getCleanJwtCookie() {
+        return ResponseCookie.from(refreshTokenName, null).path("/api/v1/auth").build();
     }
 
-    public Optional<String> resolveTokenFromCookies(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        return Arrays.stream(cookies)
-                .filter(cookie -> cookie.getName().equals(REFRESH_TOKEN_NAME))
-                .map(Cookie::getValue)
-                .findFirst();
+    public ResponseCookie generateRefreshTokenCookie(UserDetails userDetails) {
+        String refreshToken = generateRefreshToken(userDetails);
+        return ResponseCookie.from(refreshTokenName, refreshToken)
+                .path("/api/v1/auth")
+                .maxAge(refreshExpirationTimeMs)
+                .httpOnly(true)
+                .secure(true)
+                .build();
     }
 
-    public Optional<String> resolveJWTFromRequest(HttpServletRequest request) {
-        String authHeader = request.getHeader(AUTH_HEADER_NAME);
-        if (authHeader == null ||!authHeader.startsWith(AUTH_HEADER_START)) {
-            return Optional.empty();
+
+    public String resolveTokenFromCookies(HttpServletRequest request) {
+        Cookie cookie = WebUtils.getCookie(request, refreshTokenName);
+        if(cookie != null) {
+            return cookie.getValue();
         }
-        return Optional.of(authHeader.substring(JWT_START_POSITION));
+        return null;
+    }
+
+    public String resolveJWTFromRequest(HttpServletRequest request) {
+        String authHeader = request.getHeader(authHeaderName);
+        if (authHeader == null ||!authHeader.startsWith(authHeaderStart)) {
+            return null;
+        }
+        return authHeader.substring(authHeaderStart.length());
     }
 
     public String generateAccessToken(UserDetails userDetails) {
         return buildToken(new HashMap<>(), userDetails, secretAccess, accessExpirationTimeMs);
     }
 
-    public String generateRefreshToken(UserDetails userDetails) {
-        return buildToken(new HashMap<>(), userDetails, secretRefresh, refreshExpirationTimeMs);
-    }
-
-    private void save(User user, String refreshToken) {
-        tokenRepository.save(
-                Token.builder()
-                        .token(refreshToken)
-                        .user(user)
-                        .build()
-        );
+    private String generateRefreshToken(UserDetails userDetails) {
+        String refreshToken = buildToken(new HashMap<>(), userDetails, secretRefresh, refreshExpirationTimeMs);
+        save(Token.builder()
+                .token(refreshToken)
+                .user(userService.findByUsername(userDetails.getUsername()))
+                .build());
+        return refreshToken;
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {

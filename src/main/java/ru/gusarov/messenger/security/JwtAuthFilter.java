@@ -1,4 +1,4 @@
-package ru.gusarov.messenger.config;
+package ru.gusarov.messenger.security;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
@@ -16,11 +16,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import ru.gusarov.messenger.services.TokenService;
-import ru.gusarov.messenger.util.dto.errors.logic.ErrorCode;
-import ru.gusarov.messenger.util.exceptions.authentication.NotAuthorizedException;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Component
@@ -41,16 +38,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         try {
-            Optional<String> accessToken  = tokenService.resolveJWTFromRequest(request);
-            if(accessToken.isEmpty()) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
-            }
-            String username = tokenService.extractUsername(accessToken.get());
+            String accessToken  = tokenService.resolveJWTFromRequest(request);
+            String username = tokenService.extractUsername(accessToken);
 
             if(username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                if (tokenService.isTokenValid(accessToken.get(), userDetails)) {
+                if (tokenService.isTokenValid(accessToken, userDetails)) {
                     Authentication authentication = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
@@ -60,13 +53,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 }
             }
         } catch (ExpiredJwtException | SignatureException | IllegalArgumentException e) {
-            try {
-                tokenService.refresh(request, response);
-            } catch (ExpiredJwtException | SignatureException | IllegalArgumentException exception) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            }
-        } finally {
-            filterChain.doFilter(request, response);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
         }
+        filterChain.doFilter(request, response);
     }
 }

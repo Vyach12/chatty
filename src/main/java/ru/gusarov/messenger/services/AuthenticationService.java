@@ -23,7 +23,6 @@ public class AuthenticationService {
     private final RoleService roleService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-    private final TokenService tokenService;
 
     public User register(RegisterRequest request) {
         if (userService.existByUsername(request.getUsername())) {
@@ -68,7 +67,6 @@ public class AuthenticationService {
                     .errorMessage("User with username " + request.getUsername() + " does not exist")
                     .build();
         }
-
         if(!userService.isEnabled(request.getUsername())) {
             throw UserIsNotEnabledException.builder()
                     .errorCode(ErrorCode.USER_IS_NOT_ENABLED)
@@ -95,13 +93,5 @@ public class AuthenticationService {
                     .build();
         }
         return user;
-    }
-
-    public void logout(String refreshToken) {
-        var storedToken = tokenService.findByToken(refreshToken);
-        if (storedToken.isPresent()) {
-            tokenService.delete(storedToken.get());
-            SecurityContextHolder.clearContext();
-        }
     }
 }

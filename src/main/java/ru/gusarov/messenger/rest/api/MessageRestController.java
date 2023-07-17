@@ -1,10 +1,11 @@
 package ru.gusarov.messenger.rest.api;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import ru.gusarov.messenger.util.dto.authentication.MessageResponse;
 import ru.gusarov.messenger.util.dto.errors.logic.ErrorCode;
 import ru.gusarov.messenger.util.dto.message.MessageDTO;
 import ru.gusarov.messenger.models.Message;
@@ -24,21 +25,21 @@ public class MessageRestController {
     private final UserService userService;
 
     @GetMapping("/{username}")
-    public List<MessageDTO> messenger(
+    public ResponseEntity<?> messenger(
             @PathVariable String username,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         User recipient = userService.findByUsername(username);
         User sender = userService.findByUsername(userDetails.getUsername());
 
-        return messageService
+        return ResponseEntity.ok(messageService
                 .findMessagesByPeople(sender, recipient).stream()
                 .map(messageService::convertToMessageDTO)
-                .toList();
+                .toList());
     }
 
     @PostMapping("/{username}")
-    public HttpStatus sendMessage(
+    public ResponseEntity<?> sendMessage(
             @PathVariable String username,
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody String textMessage
@@ -55,11 +56,11 @@ public class MessageRestController {
                         .build()
         );
 
-        return HttpStatus.OK;
+        return ResponseEntity.ok(new MessageResponse("Message was successfully sent"));
     }
 
     @PatchMapping
-    public HttpStatus changeMessage(
+    public ResponseEntity<?> changeMessage(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody MessageDTO messageDTO
     ) {
@@ -74,6 +75,6 @@ public class MessageRestController {
 
         messageService.update(messageDTO.getId(), messageDTO.getMessage());
 
-        return HttpStatus.OK;
+        return ResponseEntity.ok(new MessageResponse("Message was successfully edited"));
     }
 }
