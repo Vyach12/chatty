@@ -11,17 +11,23 @@ spring:
         format_sql: true
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+  data:
+    mongodb:
+      host: localhost
+      port: 27016
+      database: messenger_db
+      auto-index-creation: true
 
 application:
   security:
     jwt:
       access-token:
         secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
-        expiration: 240000 # a 4 minutes
+        expiration: 4800000 # a 80 minutes
       refresh-token:
         secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
         expiration: 604800000 # 7 days
   http:
-    auth-header-name: 'Authorization:'
+    auth-header-name: 'Authorization'
     auth-header-start: 'Bearer '
     refresh-token-name: 'refresh_token'

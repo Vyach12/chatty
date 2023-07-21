@@ -41,6 +41,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             String accessToken  = tokenService.resolveJWTFromRequest(request);
             String username = tokenService.extractUsername(accessToken);
 
+
             if(username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                 if (tokenService.isTokenValid(accessToken, userDetails)) {
@@ -54,6 +55,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
         } catch (ExpiredJwtException | SignatureException | IllegalArgumentException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            System.out.println(e.getMessage());
             return;
         }
         filterChain.doFilter(request, response);

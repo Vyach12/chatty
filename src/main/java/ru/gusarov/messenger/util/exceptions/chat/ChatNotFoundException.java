@@ -1,4 +1,4 @@
-package ru.gusarov.messenger.util.exceptions.message;
+package ru.gusarov.messenger.util.exceptions.chat;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -8,9 +8,9 @@ import ru.gusarov.messenger.util.exceptions.BaseException;
 import java.time.LocalDateTime;
 
 @Getter
-public class MessageNotFoundException extends BaseException {
+public class ChatNotFoundException extends BaseException {
     @Builder
-    public MessageNotFoundException(LocalDateTime errorDate, String errorMessage, ErrorCode errorCode, Object dataCausedError) {
+    public ChatNotFoundException(LocalDateTime errorDate, String errorMessage, ErrorCode errorCode, Object dataCausedError) {
         super(errorDate, errorMessage, errorCode, dataCausedError);
     }
 }

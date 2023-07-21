@@ -3,27 +3,48 @@ package ru.gusarov.messenger.services;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-import ru.gusarov.messenger.util.dto.errors.logic.ErrorCode;
-import ru.gusarov.messenger.util.dto.message.MessageDTO;
+import ru.gusarov.messenger.models.Chat;
 import ru.gusarov.messenger.models.Message;
-import ru.gusarov.messenger.models.User;
-import ru.gusarov.messenger.repositories.MessageRepository;
-import ru.gusarov.messenger.util.exceptions.message.MessageNotFoundException;
+import ru.gusarov.messenger.repositories.ChatRepository;
+import ru.gusarov.messenger.util.dto.errors.logic.ErrorCode;
+import ru.gusarov.messenger.util.exceptions.chat.ChatNotFoundException;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-public class MessageService {
+public class ChatService {
 
     private final ModelMapper modelMapper;
-    private final MessageRepository messageRepository;
+    private final ChatRepository chatRepository;
     private final UserService userService;
 
-    public List<Message> findMessagesByPeople(User first, User second) {
+    public Chat findChatById(String id) {
+        return chatRepository.findByIdWithUsersAndMessages(id)
+                .orElseThrow(() -> ChatNotFoundException.builder()
+                        .errorCode(ErrorCode.CHAT_NOT_FOUND)
+                        .errorDate(LocalDateTime.now())
+                        .dataCausedError(id)
+                        .errorMessage("Chat with id = " + id + " does not exist")
+                        .build()
+                );
+    }
+
+    public void saveMessage(Chat chat, Message message) {
+        if(chat.getMessages() == null) {
+            chat.setMessages(Collections.singletonList(message));
+        } else {
+            chat.getMessages().add(message);
+        }
+        chatRepository.save(chat);
+    }
+
+    public void save(Chat chat) {
+
+    }
+
+/*    public List<Message> findMessagesByPeople(User first, User second) {
         List<Message> list = messageRepository.findAllBySenderAndRecipient(first, second);
         list.addAll(messageRepository.findAllBySenderAndRecipient(second, first));
         list.sort(Comparator.comparing(Message::getDateOfSending));
@@ -54,5 +75,5 @@ public class MessageService {
         messageDTO.setSender(userService.convertToUserForMessageDTO(message.getSender()));
         messageDTO.setRecipient(userService.convertToUserForMessageDTO(message.getRecipient()));
         return messageDTO;
-    }
+    }*/
 }

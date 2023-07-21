@@ -30,6 +30,10 @@ public class UserService {
                 );
     }
 
+    public User findById(int id) {
+        return userRepository.findById(id).orElseThrow();
+    }
+
     public void changeEnabled(String username) {
         User user = findByUsername(username);
         user.setEnabled(!user.isEnabled());
