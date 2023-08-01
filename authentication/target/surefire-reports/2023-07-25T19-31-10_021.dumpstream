@@ -1,5 +1,0 @@
-# Created at 2023-07-25T19:31:10.220
-Boot Manifest-JAR contains absolute paths in classpath 'D:\messenger\authentication\target\test-classes'
-Hint: <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
-'other' has different root
-
