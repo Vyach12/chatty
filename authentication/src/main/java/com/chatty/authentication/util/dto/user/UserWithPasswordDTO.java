@@ -1,4 +1,4 @@
-package com.chatty.usermanagementservice.util.dto.user;
+package com.chatty.authentication.util.dto.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,18 +8,19 @@ import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserDTO {
+public class UserWithPasswordDTO {
     private Integer id;
     private String username;
+    private String password;
     private String email;
     private Date dateOfBirth;
     private boolean isEnabled;
     private String role;
     private Collection<? extends GrantedAuthority> authorities;
 }
+

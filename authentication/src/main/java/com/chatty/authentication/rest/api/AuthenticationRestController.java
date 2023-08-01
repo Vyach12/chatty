@@ -17,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -30,7 +29,6 @@ import java.util.Optional;
 public class AuthenticationRestController {
     private final AuthenticationService authService;
     private final TokenService tokenService;
-
     private final WebClient.Builder webClientBuilder;
 
 
@@ -44,15 +42,15 @@ public class AuthenticationRestController {
                 .body(new AccessTokenResponse(tokenService.generateAccessToken(user)));
     }
 
-    /*@PostMapping("authenticate")
+    @PostMapping("authenticate")
     public ResponseEntity<?> authenticate(
             @Valid @RequestBody AuthenticationRequest request
     ){
-        User user = authService.authenticate(request);
+        UserDTO user = authService.authenticate(request);
         ResponseCookie cookie = tokenService.generateRefreshTokenCookie(user);
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(new AccessTokenResponse(tokenService.generateAccessToken(user)));
-    }*/
+    }
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(

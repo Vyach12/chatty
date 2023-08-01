@@ -8,15 +8,15 @@ import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserDTO {
+public class UserWithPasswordDTO {
     private Integer id;
     private String username;
+    private String password;
     private String email;
     private Date dateOfBirth;
     private boolean isEnabled;

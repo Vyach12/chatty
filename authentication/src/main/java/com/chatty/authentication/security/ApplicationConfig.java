@@ -1,6 +1,7 @@
 package com.chatty.authentication.security;
 
 import com.chatty.authentication.util.dto.user.UserDTO;
+import com.chatty.authentication.util.dto.user.UserWithPasswordDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -26,17 +27,16 @@ public class ApplicationConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> {
-            log.info("sent request for getting user from userDetails");
-            UserDTO userDTO = webClientBuilder.build().get()
-                    .uri("http://user-management-service/api/v1/users/{username}", username)
+            log.info("sent request for getting user for userDetails");
+            UserWithPasswordDTO userDTO = webClientBuilder.build().get()
+                    .uri("http://user-management-service/api/v1/users/private/{username}", username)
                     .retrieve()
-                    .bodyToMono(UserDTO.class)
+                    .bodyToMono(UserWithPasswordDTO.class)
                     .block();
             if(userDTO == null) {
                 throw new UsernameNotFoundException("User not found");
             }
-            log.info(userDTO.getUsername() + " " + userDTO.getAuthorities());
-            return new User(userDTO.getUsername(), "", userDTO.getAuthorities());
+            return new User(userDTO.getUsername(), userDTO.getPassword(), userDTO.getAuthorities());
         };
     }
 

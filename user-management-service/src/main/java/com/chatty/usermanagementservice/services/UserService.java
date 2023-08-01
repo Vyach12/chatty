@@ -2,9 +2,11 @@ package com.chatty.usermanagementservice.services;
 
 import com.chatty.usermanagementservice.models.User;
 import com.chatty.usermanagementservice.repositories.UserRepository;
+import com.chatty.usermanagementservice.util.dto.authentication.AuthenticationRequest;
 import com.chatty.usermanagementservice.util.dto.authentication.RegisterRequest;
 import com.chatty.usermanagementservice.util.dto.errors.logic.ErrorCode;
 import com.chatty.usermanagementservice.util.dto.user.UserDTO;
+import com.chatty.usermanagementservice.util.dto.user.UserWithPasswordDTO;
 import com.chatty.usermanagementservice.util.exceptions.user.EmailOccupiedException;
 import com.chatty.usermanagementservice.util.exceptions.user.UserNotFoundException;
 import com.chatty.usermanagementservice.util.exceptions.user.UsernameOccupiedException;
@@ -85,10 +87,24 @@ public class UserService {
         return convertToUserDTO(user);
     }
 
+    public void changeEnabled(String username) {
+        User user = findByUsername(username);
+        user.setEnabled(!user.isEnabled());
+        save(user);
+    }
+
     public UserDTO convertToUserDTO(User user) {
         UserDTO userDTO = modelMapper.map(user, UserDTO.class);
         userDTO.setRole(user.getRole().getName());
         userDTO.setAuthorities(user.getAuthorities());
         return userDTO;
     }
+
+    public UserWithPasswordDTO convertToUserWithPasswordDTO(User user) {
+        UserWithPasswordDTO userDTO = modelMapper.map(user, UserWithPasswordDTO.class);
+        userDTO.setRole(user.getRole().getName());
+        userDTO.setAuthorities(user.getAuthorities());
+        return userDTO;
+    }
+
 }
