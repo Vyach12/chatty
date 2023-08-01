@@ -1,0 +1,15 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: chatty
+spec:
+  rules:
+    - http:
+        paths:
+          - pathType: Prefix
+            path: /api/v1/auth
+            backend:
+              service:
+                name: authentication
+                port:
+                  number: 80

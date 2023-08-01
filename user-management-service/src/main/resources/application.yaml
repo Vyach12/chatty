@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: user-management-service
+  datasource:
+    url: jdbc:postgresql://${DATASOURCE_HOST:localhost}:5444/user_management_db
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+server:
+  port: 0
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka

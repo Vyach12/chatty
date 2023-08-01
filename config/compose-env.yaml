@@ -1,0 +1,21 @@
+version: '3'
+services:
+  user_management_db:
+    image: postgres:13
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: user_management_db
+    ports:
+      - "5444:5432"
+
+  authentication_db:
+    image: postgres:13
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: authentication_db
+    ports:
+      - "5445:5432"
