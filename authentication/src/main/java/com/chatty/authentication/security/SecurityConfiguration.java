@@ -17,8 +17,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 @Slf4j
 public class SecurityConfiguration {
-
-    private final JwtAuthFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
 
     @Bean
@@ -29,10 +27,6 @@ public class SecurityConfiguration {
         http
                 .authorizeHttpRequests(
                         authRequest -> authRequest
-                                //.requestMatchers("/api/v1/auth/**")
-                                //.permitAll()
-                                //.anyRequest()
-                                //.authenticated()
                                 .anyRequest()
                                 .permitAll()
                 )
@@ -40,7 +34,6 @@ public class SecurityConfiguration {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(
                         logout -> logout
                                 .logoutUrl("/api/v1/auth/logout")

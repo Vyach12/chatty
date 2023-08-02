@@ -1,7 +1,7 @@
-package com.chatty.usermanagementservice.services;
+package com.chatty.authentication.services;
 
-import com.chatty.usermanagementservice.models.Role;
-import com.chatty.usermanagementservice.repositories.RoleRepository;
+import com.chatty.authentication.models.Role;
+import com.chatty.authentication.repositories.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

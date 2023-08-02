@@ -19,6 +19,7 @@ public class Token {
     @Column(name = "token", nullable = false, unique = true)
     private String token;
 
-    @Column(name = "user_id")
-    private Integer idUser;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User idUser;
 }

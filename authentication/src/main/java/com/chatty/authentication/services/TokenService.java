@@ -1,7 +1,9 @@
 package com.chatty.authentication.services;
 
 import com.chatty.authentication.models.Token;
+import com.chatty.authentication.models.User;
 import com.chatty.authentication.repositories.TokenRepository;
+import com.chatty.authentication.util.dto.user.UserClaims;
 import com.chatty.authentication.util.dto.user.UserDTO;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -63,7 +65,7 @@ public class TokenService {
         return ResponseCookie.from(refreshTokenName, null).path("/api/v1/auth").build();
     }
 
-    public ResponseCookie generateRefreshTokenCookie(UserDTO user) {
+    public ResponseCookie generateRefreshTokenCookie(User user) {
         String refreshToken = generateRefreshToken(user);
         return ResponseCookie.from(refreshTokenName, refreshToken)
                 .path("/api/v1/auth")
@@ -73,28 +75,20 @@ public class TokenService {
                 .build();
     }
 
-    public String resolveJWTFromRequest(HttpServletRequest request) {
-        String authHeader = request.getHeader(authHeaderName);
-        if (authHeader == null ||!authHeader.startsWith(authHeaderStart)) {
-            return null;
-        }
-        return authHeader.substring(authHeaderStart.length());
-    }
-
-    public String generateAccessToken(UserDTO user) {
+    public String generateAccessToken(User user) {
         return buildToken(new HashMap<>(), user, secretAccess, accessExpirationTimeMs);
     }
 
-    private String generateRefreshToken(UserDTO user) {
+    private String generateRefreshToken(User user) {
         String refreshToken = buildToken(new HashMap<>(), user, secretRefresh, refreshExpirationTimeMs);
         save(Token.builder()
                 .token(refreshToken)
-                .idUser(user.getId())
+                .idUser(user)
                 .build());
         return refreshToken;
     }
 
-    public boolean isTokenValid(String token, UserDTO user) {
+    public boolean isTokenValid(String token, User user) {
         final String username = extractUsername(token);
         return (username.equals(user.getUsername())) && !isTokenExpired(token);
     }
@@ -102,14 +96,15 @@ public class TokenService {
 
     private String buildToken(
             Map<String, Object> extraClaims,
-            UserDTO user,
+            User user,
             String secretKey,
             long expiration
     ) {
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
-                .setSubject(user.getUsername())
+                .setSubject(user.getId().toString())
+                .claim("role", user.getRole())
                 .claim("authorities", user.getAuthorities())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))

@@ -1,14 +1,16 @@
 package com.chatty.authentication.rest.api;
 
 import com.chatty.authentication.models.Token;
+import com.chatty.authentication.models.User;
 import com.chatty.authentication.services.AuthenticationService;
 import com.chatty.authentication.services.TokenService;
+import com.chatty.authentication.services.UserService;
 import com.chatty.authentication.util.dto.authentication.AccessTokenResponse;
 import com.chatty.authentication.util.dto.authentication.AuthenticationRequest;
 import com.chatty.authentication.util.dto.authentication.MessageResponse;
 import com.chatty.authentication.util.dto.authentication.RegisterRequest;
 import com.chatty.authentication.util.dto.errors.logic.ErrorCode;
-import com.chatty.authentication.util.dto.user.UserDTO;
+import com.chatty.authentication.util.dto.user.UserClaims;
 import com.chatty.authentication.util.exceptions.token.TokenNotFoundException;
 import com.chatty.authentication.util.exceptions.user.UserNotFoundException;
 import jakarta.validation.Valid;
@@ -29,14 +31,13 @@ import java.util.Optional;
 public class AuthenticationRestController {
     private final AuthenticationService authService;
     private final TokenService tokenService;
-    private final WebClient.Builder webClientBuilder;
-
+    private final UserService userService;
 
     @PostMapping("register")
     public ResponseEntity<?> register(
             @Valid @RequestBody RegisterRequest request
     ) {
-        UserDTO user = authService.register(request);
+        User user = authService.register(request);
         ResponseCookie cookie = tokenService.generateRefreshTokenCookie(user);
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(new AccessTokenResponse(tokenService.generateAccessToken(user)));
@@ -46,7 +47,7 @@ public class AuthenticationRestController {
     public ResponseEntity<?> authenticate(
             @Valid @RequestBody AuthenticationRequest request
     ){
-        UserDTO user = authService.authenticate(request);
+        User user = authService.authenticate(request);
         ResponseCookie cookie = tokenService.generateRefreshTokenCookie(user);
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(new AccessTokenResponse(tokenService.generateAccessToken(user)));
@@ -79,19 +80,7 @@ public class AuthenticationRestController {
         }
 
         String username = tokenService.extractUsername(refreshToken);
-        UserDTO user = webClientBuilder.build().get()
-                .uri("http://user-management-service/api/v1/users/{username}", username)
-                .retrieve()
-                .bodyToMono(UserDTO.class)
-                .block();
-        if(user == null) {
-            throw UserNotFoundException.builder()
-                    .errorCode(ErrorCode.USER_NOT_FOUND)
-                    .dataCausedError(username)
-                    .errorMessage("User with username " + username + " doess not exist")
-                    .dataCausedError(LocalDateTime.now())
-                    .build();
-        }
+        User user = userService.findByUsername(username);
 
         if (tokenService.isTokenValid(refreshToken, user)) {
             tokenService.delete(refreshToken);

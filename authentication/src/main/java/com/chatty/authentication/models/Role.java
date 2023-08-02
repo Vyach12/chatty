@@ -1,4 +1,4 @@
-package com.chatty.usermanagementservice.models;
+package com.chatty.authentication.models;
 
 import jakarta.persistence.*;
 import lombok.*;
