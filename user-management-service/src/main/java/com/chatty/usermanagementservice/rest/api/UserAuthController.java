@@ -1,17 +1,18 @@
 package com.chatty.usermanagementservice.rest.api;
 
 import com.chatty.usermanagementservice.services.UserService;
+import com.chatty.usermanagementservice.util.dto.authentication.RegisterRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("api/v1/users/auth")
 @RequiredArgsConstructor
-public class UserClaimsController {
+@Slf4j
+public class UserAuthController {
     private final UserService userService;
     @GetMapping("/claims/{username}")
     public ResponseEntity<?> getUserClaims(@PathVariable String username) {
@@ -21,6 +22,11 @@ public class UserClaimsController {
                         userService.findByUsername(username)
                 )
         );
+    }
+
+    @PostMapping("/createUser")
+    public ResponseEntity<?> createUser(@Valid @RequestBody RegisterRequest request) {
+        return ResponseEntity.ok(userService.createUser(request));
     }
 
 }

@@ -1,7 +1,6 @@
 spring:
   application:
     name: api-gateway-service
-
   cloud:
     config:
       enabled: false
@@ -16,6 +15,8 @@ spring:
           uri: lb://user-management-service
           predicates:
             - Path=/api/v1/users/**
+          filters:
+            - name: JwtAuthenticationFilter
 
         - id: eureka-server
           uri: http://localhost:8761

@@ -34,15 +34,7 @@ public class UserRestController {
                 userService.findByUsername(username))
         );
     }
-    @GetMapping("/private/{username}")
-    public ResponseEntity<?> getUserWithPassword(@PathVariable String username) {
-        log.info("try to take user {}", username);
-        return ResponseEntity.ok(
-                userService.convertToUserWithPasswordDTO(
-                        userService.findByUsername(username)
-                )
-        );
-    }
+
 
 
     @PatchMapping("/changeUsername")
@@ -64,11 +56,6 @@ public class UserRestController {
         userService.save(user);
 
         return ResponseEntity.ok(new MessageResponse("Name was successfully changed"));
-    }
-
-    @PostMapping("/createUser")
-    public ResponseEntity<?> createUser(@Valid @RequestBody RegisterRequest request) {
-        return ResponseEntity.ok(userService.createUser(request));
     }
 
     //При необходимости методы для email и date_of_birth и password

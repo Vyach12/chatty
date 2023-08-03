@@ -2,11 +2,10 @@ package com.chatty.usermanagementservice.services;
 
 import com.chatty.usermanagementservice.models.User;
 import com.chatty.usermanagementservice.repositories.UserRepository;
-import com.chatty.usermanagementservice.util.dto.authentication.AuthenticationRequest;
 import com.chatty.usermanagementservice.util.dto.authentication.RegisterRequest;
 import com.chatty.usermanagementservice.util.dto.errors.logic.ErrorCode;
 import com.chatty.usermanagementservice.util.dto.user.UserDTO;
-import com.chatty.usermanagementservice.util.dto.user.UserWithPasswordDTO;
+import com.chatty.usermanagementservice.util.dto.user.UserClaims;
 import com.chatty.usermanagementservice.util.exceptions.user.EmailOccupiedException;
 import com.chatty.usermanagementservice.util.exceptions.user.UserNotFoundException;
 import com.chatty.usermanagementservice.util.exceptions.user.UsernameOccupiedException;
@@ -54,37 +53,10 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public UserDTO createUser(RegisterRequest request) {
-        if (existByUsername(request.getUsername())) {
-            throw UsernameOccupiedException.builder()
-                    .errorCode(ErrorCode.USERNAME_IS_OCCUPIED)
-                    .errorDate(LocalDateTime.now())
-                    .dataCausedError(request)
-                    .errorMessage("User with username " + request.getUsername() + " already exist")
-                    .build();
-        }
+    public UserClaims createUser(RegisterRequest request) {
 
-        if (existByEmail(request.getEmail())) {
-            throw EmailOccupiedException.builder()
-                    .errorCode(ErrorCode.EMAIL_IS_OCCUPIED)
-                    .errorDate(LocalDateTime.now())
-                    .dataCausedError(request)
-                    .errorMessage("User with email " + request.getEmail() + " already exist")
-                    .build();
-        }
 
-        var user = User.builder()
-                .username(request.getUsername())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .dateOfBirth(request.getDateOfBirth())
-                .email(request.getEmail())
-                .isEnabled(true)
-                .role(roleService.findByName("ROLE_USER"))
-                .build();
-
-        save(user);
-
-        return convertToUserDTO(user);
+        return convertToUserClaims(user);
     }
 
     public void changeEnabled(String username) {
@@ -100,8 +72,8 @@ public class UserService {
         return userDTO;
     }
 
-    public UserWithPasswordDTO convertToUserWithPasswordDTO(User user) {
-        UserWithPasswordDTO userDTO = modelMapper.map(user, UserWithPasswordDTO.class);
+    public UserClaims convertToUserClaims(User user) {
+        UserClaims userDTO = modelMapper.map(user, UserClaims.class);
         userDTO.setRole(user.getRole().getName());
         userDTO.setAuthorities(user.getAuthorities());
         return userDTO;

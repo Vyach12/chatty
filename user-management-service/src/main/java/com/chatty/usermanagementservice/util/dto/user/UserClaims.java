@@ -12,7 +12,8 @@ import java.util.Collection;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserWithPasswordDTO {
+public class UserClaims {
+    private Integer id;
     private String username;
     private String password;
     private String role;

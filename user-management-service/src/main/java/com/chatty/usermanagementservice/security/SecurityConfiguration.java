@@ -17,32 +17,20 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 @Slf4j
 public class SecurityConfiguration {
-    private final AuthenticationProvider authenticationProvider;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        log.info("Залетел в защитный фильтер цепь");
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable);
         http
                 .authorizeHttpRequests(
                         authRequest -> authRequest
-                                //.requestMatchers("/api/v1/auth/**")
-                                //.permitAll()
-                                //.anyRequest()
-                                //.authenticated()
-                                .anyRequest()
+                                .requestMatchers("/api/v1/users/**")
                                 .permitAll()
-                )
-                /*.sessionManagement(sessionManagement -> sessionManagement
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-                .authenticationProvider(authenticationProvider)
-                .logout(
-                        logout -> logout
-                                .logoutUrl("/api/v1/auth/logout")
-                )*/;
+                                .anyRequest()
+                                .authenticated()
+                );
         return http.build();
     }
 }
