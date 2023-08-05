@@ -3,14 +3,11 @@ package com.chatty.authentication.services;
 import com.chatty.authentication.models.Token;
 import com.chatty.authentication.models.User;
 import com.chatty.authentication.repositories.TokenRepository;
-import com.chatty.authentication.util.dto.user.UserClaims;
-import com.chatty.authentication.util.dto.user.UserDTO;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
@@ -88,9 +85,12 @@ public class TokenService {
         return refreshToken;
     }
 
-    public boolean isTokenValid(String token, User user) {
-        final String username = extractUsername(token);
-        return (username.equals(user.getUsername())) && !isTokenExpired(token);
+    public boolean isTokenValid(String token) {
+        try {
+            return !isTokenExpired(token);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
 
@@ -114,7 +114,7 @@ public class TokenService {
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
-    public String extractUsername(String token) {
+    public String extractSubject(String token) {
         return extractClaim(token, Claims::getSubject);
     }
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {

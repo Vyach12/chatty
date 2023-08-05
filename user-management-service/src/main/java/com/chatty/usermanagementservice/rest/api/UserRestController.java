@@ -1,22 +1,21 @@
 package com.chatty.usermanagementservice.rest.api;
 
 import com.chatty.usermanagementservice.models.User;
+import com.chatty.usermanagementservice.services.TokenService;
 import com.chatty.usermanagementservice.services.UserService;
-import com.chatty.usermanagementservice.util.dto.authentication.MessageResponse;
-import com.chatty.usermanagementservice.util.dto.authentication.RegisterRequest;
+import com.chatty.usermanagementservice.util.dto.user.UserInfo;
 import com.chatty.usermanagementservice.util.dto.errors.logic.ErrorCode;
-import com.chatty.usermanagementservice.util.dto.user.UpdatedUsernameDTO;
-import com.chatty.usermanagementservice.util.exceptions.user.UsernameOccupiedException;
-import jakarta.validation.Valid;
+import com.chatty.usermanagementservice.util.exceptions.user.IdOccupiedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
+
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -25,6 +24,7 @@ import java.time.LocalDateTime;
 @Slf4j
 public class UserRestController {
     private final UserService userService;
+    private final TokenService tokenService;
 
 
     @GetMapping("{username}")
@@ -35,41 +35,30 @@ public class UserRestController {
         );
     }
 
-
-
-    @PatchMapping("/changeUsername")
-    public ResponseEntity<?> changeUsername(
-            @RequestBody UpdatedUsernameDTO updatedUsernameDTO,
-            @AuthenticationPrincipal UserDetails userDetails
+    @PostMapping("new")
+    public String newUser(
+            @RequestBody UserInfo request,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken
     ) {
-        if(userService.existByUsername(updatedUsernameDTO.getUsername())) {
-            throw UsernameOccupiedException.builder()
-                    .errorCode(ErrorCode.USERNAME_IS_OCCUPIED)
+        log.info("****************************************");
+        log.info("Creating user {}", request.getUsername());
+        bearerToken = bearerToken.substring(7);
+        UUID id = UUID.fromString(tokenService.extractSubject(bearerToken));
+        if(userService.existById(id)){
+            throw IdOccupiedException.builder()
+                    .errorCode(ErrorCode.ID_IS_OCCUPIED)
                     .errorDate(LocalDateTime.now())
-                    .dataCausedError(updatedUsernameDTO)
-                    .errorMessage("User with username = " + updatedUsernameDTO.getUsername() + " already exist")
+                    .dataCausedError(id)
+                    .errorMessage("User with id = " + id + " already exists")
                     .build();
         }
-
-        User user = userService.findByUsername(userDetails.getUsername());
-        user.setUsername(updatedUsernameDTO.getUsername());
+        User user = User.builder()
+                .id(id)
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .dateOfBirth(request.getDateOfBirth())
+                .build();
         userService.save(user);
-
-        return ResponseEntity.ok(new MessageResponse("Name was successfully changed"));
-    }
-
-    //При необходимости методы для email и date_of_birth и password
-    @PreAuthorize("hasAnyAuthority('ban_users')")
-    @PatchMapping("{username}/ban")
-    public ResponseEntity<?> banUser(@PathVariable String username) {
-        userService.changeEnabled(username);
-        return ResponseEntity.ok(new MessageResponse("User was successfully banned"));
-    }
-
-    @PreAuthorize("hasAnyAuthority('ban_users')")
-    @PatchMapping("{username}/unban")
-    public ResponseEntity<?> unbanUser(@PathVariable String username) {
-        userService.changeEnabled(username);
-        return ResponseEntity.ok(new MessageResponse("User was successfully unbanned"));
+        return "true";
     }
 }

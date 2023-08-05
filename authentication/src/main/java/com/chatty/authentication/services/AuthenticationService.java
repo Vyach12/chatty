@@ -6,11 +6,13 @@ import com.chatty.authentication.util.dto.authentication.RegisterRequest;
 import com.chatty.authentication.util.dto.errors.logic.ErrorCode;
 import com.chatty.authentication.util.dto.user.UserClaims;
 import com.chatty.authentication.util.dto.user.UserDTO;
+import com.chatty.authentication.util.dto.user.UserInfo;
 import com.chatty.authentication.util.exceptions.authentication.InvalidUsernamePasswordException;
 import com.chatty.authentication.util.exceptions.user.EmailOccupiedException;
 import com.chatty.authentication.util.exceptions.user.UsernameOccupiedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -62,7 +64,6 @@ public class AuthenticationService {
 
         userService.save(user);
 
-        //Метод для отправки данных на создание чела в Сервис пользователей
         return user;
     }
 

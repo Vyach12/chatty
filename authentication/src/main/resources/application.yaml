@@ -1,4 +1,5 @@
 spring:
+
   application:
     name: authentication-service
   datasource:
@@ -12,6 +13,10 @@ spring:
         format_sql: true
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    url: jdbc:postgresql://${DATASOURCE_HOST:localhost}:5445/authentication_db
+    user: postgres
+    password: postgres
 
 server:
   port: 0

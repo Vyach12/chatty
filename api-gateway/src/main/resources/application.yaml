@@ -4,31 +4,7 @@ spring:
   cloud:
     config:
       enabled: false
-    gateway:
-      routes:
-        - id: authentication-service
-          uri: lb://authentication-service
-          predicates:
-            - Path=/api/v1/auth/**
 
-        - id: user-management-service
-          uri: lb://user-management-service
-          predicates:
-            - Path=/api/v1/users/**
-          filters:
-            - name: JwtAuthenticationFilter
-
-        - id: eureka-server
-          uri: http://localhost:8761
-          predicates:
-            - Path=/eureka/web
-          filters:
-            - SetPath=/
-
-        - id: eureka-server-static
-          uri: http://localhost:8761
-          predicates:
-            - Path=/eureka/**
 
 
 eureka:

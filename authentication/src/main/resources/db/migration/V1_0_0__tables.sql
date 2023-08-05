@@ -1,9 +1,3 @@
-create table tokens(
-     id serial primary key,
-     token varchar unique not null,
-     user_id int not null
-);
-
 create table roles(
     id serial primary key,
     name varchar not null unique
@@ -27,6 +21,12 @@ create table _users(
     password varchar not null,
     is_enabled boolean not null,
     role_id int references roles(id) not null
+);
+
+create table tokens(
+    id serial primary key,
+    token varchar unique not null,
+    user_id uuid references _users(id) not null
 );
 
 INSERT INTO roles(name) VALUES ('ROLE_USER');

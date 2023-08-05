@@ -16,6 +16,7 @@ import java.util.UUID;
 public class User {
     @Id
     private UUID id;
+
     @Column(name = "username", unique = true, nullable = false)
     private String username;
 
