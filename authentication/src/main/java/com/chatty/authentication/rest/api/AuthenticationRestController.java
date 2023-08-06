@@ -16,9 +16,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
-import org.springframework.security.core.AuthenticatedPrincipal;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -40,7 +37,7 @@ public class AuthenticationRestController {
     public ResponseEntity<?> register(
             @Valid @RequestBody RegisterRequest request
     ) {
-        User user = authService.register(request); //Сместить сохранение пользователя в конец базы данных
+        User user = authService.register(request);
 
         var userInfo = UserInfo.builder()
                 .username(request.getUsername())
@@ -51,16 +48,15 @@ public class AuthenticationRestController {
         ResponseCookie cookie = tokenService.generateRefreshTokenCookie(user);
         String accessToken = tokenService.generateAccessToken(user);
 
-        log.info("Send request to create user");
-        String x = webClientBuilder.build().post()
+        log.info("Sent request to create user");
+
+        webClientBuilder.build().post()
                 .uri("http://user-management-service/api/v1/users/new")
                 .header("Authorization", "Bearer " + accessToken)
                 .bodyValue(userInfo)
                 .retrieve()
-                .bodyToMono(String.class)
+                .bodyToMono(Void.class)
                 .block();
-        log.info(x);
-        log.info("suuuuuuiiii");
 
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(new AccessTokenResponse(accessToken));
@@ -86,7 +82,7 @@ public class AuthenticationRestController {
                 .body(new MessageResponse("You've been signed out!"));
     }
 
-    @PostMapping("refresh-token") //переделать не используя поиск юзера в бд
+    @PostMapping("refresh-token")
     public ResponseEntity<?> refresh(
             @CookieValue("refresh_token") String refreshToken
     ) {
