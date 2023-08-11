@@ -2,35 +2,22 @@ package com.chatty.chatsupport.models;
 
 import lombok.*;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "messages")
 public class Message {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
-    @ManyToOne
-    @JoinColumn(name = "sender_id", nullable = false)
-    private User sender;
-    @ManyToOne
-    @JoinColumn(name = "recipient_id", nullable = false)
-    private User recipient;
-
-    @Column(name = "message", nullable = false)
-    private String message;
-
-    @Column(name = "date_of_sending", nullable = false)
+    private String id;
+    private String sender;
+    private String text;
     private LocalDateTime dateOfSending;
-
-    @Column(name = "date_of_change")
     private LocalDateTime dateOfChange;
+    private List<String> images;
+    private List<String> videos;
+    private List<String> music;
 }

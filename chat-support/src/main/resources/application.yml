@@ -1,33 +1,34 @@
 spring:
   application:
-    name: authentication-server
-  datasource:
-    url: jdbc:postgresql://localhost:5432/messenger_db
-    username: postgres
-    password: Qwe2qwe2
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    show-sql: false
-    properties:
-      hibernate:
-        format_sql: true
-    database: postgresql
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    name: chat-support-service
+  data:
+    mongodb:
+      host: chats_db
+      port: 27017
+      database: chats_db
+  flyway:
+    locations: classpath:db/migration
 
 server:
-  port: 8080
+  port: 0
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
 
 application:
   security:
     jwt:
       access-token:
         secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
-        expiration: 240000 # a 4 minutes
+        expiration: 4800000 # a 80 minutes
       refresh-token:
         secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
         expiration: 604800000 # 7 days
   http:
-    auth-header-name: 'Authorization:'
+    auth-header-name: 'Authorization'
     auth-header-start: 'Bearer '
     refresh-token-name: 'refresh_token'
 

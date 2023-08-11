@@ -4,19 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import com.chatty.chatsupport.util.dto.user.UserForMessageDTO;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class MessageDTO {
-    private int id;
-    private String message;
-    private UserForMessageDTO sender;
-    private UserForMessageDTO recipient;
-    private LocalDateTime dateOfSending;
-    private LocalDateTime dateOfChange;
+    private String text;
+    private List<String> images;
+    private List<String> videos;
+    private List<String> music;
 }

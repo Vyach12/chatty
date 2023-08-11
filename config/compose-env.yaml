@@ -2,6 +2,7 @@ version: '3'
 services:
   users_db:
     image: postgres:13
+    container_name: users_db
     restart: always
     environment:
       POSTGRES_PASSWORD: postgres
@@ -12,6 +13,7 @@ services:
 
   authentication_db:
     image: postgres:13
+    container_name: authentication_db
     restart: always
     environment:
       POSTGRES_PASSWORD: postgres
@@ -19,3 +21,10 @@ services:
       POSTGRES_DB: authentication_db
     ports:
       - "5445:5432"
+
+  chats_db:
+    image: mongo:5.0
+    container_name: chats_db
+    restart: always
+    ports:
+      - "27017:27017"

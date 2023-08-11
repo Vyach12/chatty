@@ -34,6 +34,12 @@ public class UserRestController {
         );
     }
 
+    @GetMapping("{username}/getID")
+    public ResponseEntity<?> getUserID(@PathVariable String username) {
+        return ResponseEntity.ok(userService.findByUsername(username).getId());
+    }
+
+
     @PostMapping("new")
     public void newUser(
             @RequestBody UserInfo request,
