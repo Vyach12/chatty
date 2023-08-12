@@ -1,9 +1,12 @@
 package com.chatty.chatsupport.services;
 
 import com.chatty.chatsupport.models.Chat;
+import com.chatty.chatsupport.models.UserID;
 import com.chatty.chatsupport.repositories.ChatRepository;
+import com.chatty.chatsupport.util.dto.chats.ChatDTO;
 import com.chatty.chatsupport.util.dto.message.MessageDTO;
 import com.chatty.chatsupport.util.exceptions.chat.ChatNotFoundException;
+import com.chatty.chatsupport.util.exceptions.chat.NoAccessException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -44,7 +47,40 @@ public class ChatService {
         chatRepository.save(chat);
     }
 
-    public List<Message> getMessagesFromChat(String chatID) {
-        return findChatById(chatID).getMessages();
+    public List<Message> getMessagesFromChat(String chatID, UserID userID) {
+        Chat chat = findChatById(chatID);
+        if(!chat.getUsers().contains(userID)) {
+            throw NoAccessException.builder()
+                    .errorCode(ErrorCode.NO_ACCESS)
+                    .errorMessage("No access to the chat")
+                    .dataCausedError(chatID)
+                    .errorDate(LocalDateTime.now())
+                    .build();
+        }
+        return chat.getMessages();
+    }
+
+    public List<ChatDTO> findChatsByUser(UserID userID) {
+        return chatRepository.findChatByUsersIsContaining(userID).stream()
+                .map(this::convertToChatDTO)
+                .toList();
+    }
+
+    private ChatDTO convertToChatDTO(Chat chat) {
+        if(chat.getMessages().isEmpty()) {
+            return ChatDTO.builder()
+                    .id(chat.getId())
+                    .name(chat.getName())
+                    .lastMessage(null)
+                    .lastMessageOwner(null)
+                    .build();
+        }
+        Message lastMessage = chat.getMessages().get(chat.getMessages().size() - 1);
+        return ChatDTO.builder()
+                .id(chat.getId())
+                .name(chat.getName())
+                .lastMessage(lastMessage.getText())
+                .lastMessageOwner(lastMessage.getSender())
+                .build();
     }
 }

@@ -5,6 +5,8 @@ import com.chatty.chatsupport.models.Message;
 import com.chatty.chatsupport.services.ChatService;
 import com.chatty.chatsupport.services.TokenService;
 import com.chatty.chatsupport.util.dto.authentication.MessageResponse;
+import com.chatty.chatsupport.util.dto.chats.ChatDTO;
+import com.chatty.chatsupport.util.dto.chats.ChatRequest;
 import com.chatty.chatsupport.util.dto.message.MessageDTO;
 import com.chatty.chatsupport.models.UserID;
 import lombok.RequiredArgsConstructor;
@@ -30,21 +32,24 @@ public class ChatRestController {
     private final TokenService tokenService;
     private final WebClient.Builder webClientBuilder;
 
-    @GetMapping("/{chatID}")
-    public ResponseEntity<?> messenger(@PathVariable String chatID) {
-        List<Message> messages = chatService.getMessagesFromChat(chatID);
-        return ResponseEntity.ok(messages);
+    @GetMapping
+    public ResponseEntity<?> getChats(@RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
+        String accessToken = tokenService.getToken(bearerToken);
+        UserID userID = new UserID(tokenService.extractSubject(accessToken));
+        List<ChatDTO> chats = chatService.findChatsByUser(userID);
+        return ResponseEntity.ok(chats);
     }
 
-    @PostMapping("/{username}")
+    @PostMapping()
     public ResponseEntity<?> createChat(
-            @PathVariable String username,
-            @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken,
+            @RequestBody ChatRequest chatRequest
+    ) {
 
         String accessToken = tokenService.getToken(bearerToken);
 
         String userID = webClientBuilder.build().get()
-                .uri("http://user-management-service/api/v1/users/{username}/getID", username)
+                .uri("http://user-management-service/api/v1/users/{username}/getID", chatRequest)
                 .header("Authorization", "Bearer " + accessToken)
                 .retrieve()
                 .bodyToMono(String.class)
@@ -65,11 +70,25 @@ public class ChatRestController {
         );
     }
 
-    @PatchMapping("/{chatId}")
+
+    @GetMapping("/message/{chatID}")
+    public ResponseEntity<?> getMessages(
+            @PathVariable String chatID,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken
+    ) {
+        String accessToken = tokenService.getToken(bearerToken);
+        UserID userID = new UserID(tokenService.extractSubject(accessToken));
+        List<Message> messages = chatService.getMessagesFromChat(chatID, userID);
+        return ResponseEntity.ok(messages);
+    }
+
+
+    @PostMapping("/message/{chatId}")
     public ResponseEntity<?> sendMessage(
             @PathVariable String chatId,
             @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken,
-            @RequestBody MessageDTO messageDTO) {
+            @RequestBody MessageDTO messageDTO
+    ) {
 
         Chat chat = chatService.findChatById(chatId);
         String accessToken = tokenService.getToken(bearerToken);
