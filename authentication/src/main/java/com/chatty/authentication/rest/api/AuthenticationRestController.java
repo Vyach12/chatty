@@ -11,6 +11,7 @@ import com.chatty.authentication.util.dto.authentication.MessageResponse;
 import com.chatty.authentication.util.dto.authentication.RegisterRequest;
 import com.chatty.authentication.util.dto.errors.logic.ErrorCode;
 import com.chatty.authentication.util.dto.user.UserInfo;
+import com.chatty.authentication.util.dto.user.UserRequest;
 import com.chatty.authentication.util.exceptions.token.TokenNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +46,6 @@ public class AuthenticationRestController {
                 .dateOfBirth(request.getDateOfBirth())
                 .build();
 
-        ResponseCookie cookie = tokenService.generateRefreshTokenCookie(user);
         String accessToken = tokenService.generateAccessToken(user);
 
         log.info("Sent request to create user");
@@ -58,6 +58,19 @@ public class AuthenticationRestController {
                 .bodyToMono(Void.class)
                 .block();
 
+        var userRequest = UserRequest.builder()
+                .username(request.getUsername())
+                .build();
+
+        webClientBuilder.build().post()
+                .uri("http://chat-support-service/api/v1/chats/users/new")
+                .header("Authorization", "Bearer " + accessToken)
+                .bodyValue(userRequest)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .block();
+
+        ResponseCookie cookie = tokenService.generateRefreshTokenCookie(user);
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(new AccessTokenResponse(accessToken));
     }
@@ -114,10 +127,8 @@ public class AuthenticationRestController {
 
     @GetMapping("/validateToken")
     public Boolean validateToken(@RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
-        log.info(bearerToken);
         if(bearerToken.startsWith("Bearer ")) {
             bearerToken = bearerToken.substring(7);
-            log.info(bearerToken);
             return tokenService.isTokenValid(bearerToken);
         }
         return false;

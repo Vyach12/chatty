@@ -5,19 +5,16 @@ import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
-@Document(collection = "chats")
-public class Chat {
+@Document(collection = "users")
+public class User {
     @Id
-    private ObjectId id;
-    private String name;
-    private List<ObjectId> users;
-    private List<Message> messages;
+    private UUID id;
+    private String username;
 }

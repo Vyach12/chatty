@@ -4,6 +4,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -12,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class Message {
 
-    private String id;
+    private UUID id;
     private String sender;
     private String text;
     private LocalDateTime dateOfSending;

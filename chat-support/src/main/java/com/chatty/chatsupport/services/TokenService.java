@@ -30,9 +30,6 @@ public class TokenService {
         return claimsResolver.apply(claims);
     }
 
-    public Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
-    }
     public String getToken(String bearerToken) {
         if(!bearerToken.startsWith("Bearer ")) {
             throw WrongTypeTokenException.builder()

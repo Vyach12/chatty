@@ -26,7 +26,7 @@ public class UserRestController {
     private final TokenService tokenService;
 
 
-    @GetMapping("{username}")
+    @GetMapping("/{username}")
     public ResponseEntity<?> getUser(@PathVariable String username) {
         log.info("try to take user {}", username);
         return ResponseEntity.ok(userService.convertToUserDTO(
@@ -34,14 +34,8 @@ public class UserRestController {
         );
     }
 
-    @GetMapping("{username}/getID")
-    public ResponseEntity<?> getUserID(@PathVariable String username) {
-        return ResponseEntity.ok(userService.findByUsername(username).getId());
-    }
-
-
-    @PostMapping("new")
-    public void newUser(
+    @PostMapping("/new")
+    public void createUser(
             @RequestBody UserInfo request,
             @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken
     ) {
