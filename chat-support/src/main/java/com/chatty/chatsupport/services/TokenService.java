@@ -1,7 +1,7 @@
 package com.chatty.chatsupport.services;
 
-import com.chatty.chatsupport.util.dto.errors.logic.ErrorCode;
-import com.chatty.chatsupport.util.exceptions.token.WrongTypeTokenException;
+import com.chatty.util.errors.logic.ErrorCode;
+import com.chatty.util.exceptions.token.WrongTypeTokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.function.Function;
 
 @Service
@@ -21,6 +20,12 @@ public class TokenService {
 
     @Value("${application.security.jwt.access-token.secret-key}")
     private String secretAccess;
+
+    @Value("${application.http.auth-header-name}")
+    private String authHeaderName;
+
+    @Value("${application.http.auth-header-start}")
+    private String authHeaderStart;
 
     public String extractSubject(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -31,7 +36,7 @@ public class TokenService {
     }
 
     public String getToken(String bearerToken) {
-        if(!bearerToken.startsWith("Bearer ")) {
+        if(!bearerToken.startsWith(authHeaderStart)) {
             throw WrongTypeTokenException.builder()
                     .errorCode(ErrorCode.UNSSUPPORTED_TOKEN)
                     .dataCausedError(bearerToken)

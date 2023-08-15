@@ -1,11 +1,11 @@
 package com.chatty.usermanagement.rest.api.handling;
 
-import com.chatty.usermanagement.util.dto.errors.data.DataFieldError;
-import com.chatty.usermanagement.util.dto.errors.data.InvalidDataResponse;
-import com.chatty.usermanagement.util.dto.errors.logic.ErrorCode;
-import com.chatty.usermanagement.util.dto.errors.logic.ErrorEntity;
-import com.chatty.usermanagement.util.dto.errors.logic.ErrorResponse;
-import com.chatty.usermanagement.util.exceptions.BaseException;
+import com.chatty.util.errors.data.DataFieldError;
+import com.chatty.util.errors.data.InvalidDataResponse;
+import com.chatty.util.errors.logic.ErrorCode;
+import com.chatty.util.errors.logic.ErrorEntity;
+import com.chatty.util.errors.logic.ErrorResponse;
+import com.chatty.util.exceptions.BaseException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;

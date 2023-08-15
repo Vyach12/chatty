@@ -1,15 +1,17 @@
 package com.chatty.chatsupport.services;
 
 import com.chatty.chatsupport.models.Chat;
+import com.chatty.chatsupport.models.User;
 import com.chatty.chatsupport.repositories.ChatRepository;
-import com.chatty.chatsupport.util.dto.chats.ChatDTO;
-import com.chatty.chatsupport.util.exceptions.chat.ChatNotFoundException;
-import com.chatty.chatsupport.util.exceptions.chat.NoAccessException;
+import com.chatty.chatsupport.dto.chats.ChatDTO;
+import com.chatty.util.errors.logic.ErrorCode;
+import com.chatty.util.exceptions.chat.ChatNotFoundException;
+import com.chatty.util.exceptions.chat.NoAccessException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-import com.chatty.chatsupport.util.dto.errors.logic.ErrorCode;
 import com.chatty.chatsupport.models.Message;
 
 import java.time.LocalDateTime;
@@ -17,12 +19,12 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ChatService {
 
-    private final ModelMapper modelMapper;
     private final ChatRepository chatRepository;
 
-    public Chat findChatById(ObjectId id) {
+    public Chat findChatById(String id) {
         return chatRepository.findChatById(id)
                 .orElseThrow(() -> ChatNotFoundException.builder()
                         .errorCode(ErrorCode.CHAT_NOT_FOUND)
@@ -46,26 +48,25 @@ public class ChatService {
         chatRepository.save(chat);
     }
 
-    public List<Message> getMessagesFromChat(ObjectId chatID, ObjectId user) {
-        Chat chat = findChatById(chatID);
+    public List<Message> getMessagesFromChat(Chat chat, User user) {
         if(!chat.getUsers().contains(user)) {
             throw NoAccessException.builder()
                     .errorCode(ErrorCode.NO_ACCESS)
                     .errorMessage("No access to the chat")
-                    .dataCausedError(chatID)
+                    .dataCausedError(chat)
                     .errorDate(LocalDateTime.now())
                     .build();
         }
         return chat.getMessages();
     }
 
-    public List<ChatDTO> findChatsById(ObjectId id) {
-        return chatRepository.findChatByUsersIsContaining(id).stream()
-                .map(this::convertToChatDTO)
-                .toList();
+    public List<Chat> findChatsById(User user) {
+        log.info("user: " + user.getId() + " " + user.getUsername());
+        return chatRepository.findChatByUsersIsContaining(user);
     }
 
-    private ChatDTO convertToChatDTO(Chat chat) {
+    public ChatDTO convertToChatDTO(Chat chat) {
+        log.info("chat: {}, {}", chat.getId(), chat.getName());
         if(chat.getMessages().isEmpty()) {
             return ChatDTO.builder()
                     .id(chat.getId())
@@ -83,5 +84,9 @@ public class ChatService {
                 .lastMessage(lastMessage.getText())
                 .lastMessageOwner(lastMessage.getSender())
                 .build();
+    }
+
+    public boolean canAccess(Chat chat, User user) {
+        return chat.getUsers().stream().anyMatch(u -> u.getId().equals(user.getId()));
     }
 }

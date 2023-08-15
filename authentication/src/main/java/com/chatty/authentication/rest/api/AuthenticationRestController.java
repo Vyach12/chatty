@@ -5,17 +5,16 @@ import com.chatty.authentication.models.User;
 import com.chatty.authentication.services.AuthenticationService;
 import com.chatty.authentication.services.TokenService;
 import com.chatty.authentication.services.UserService;
-import com.chatty.authentication.util.dto.authentication.AccessTokenResponse;
-import com.chatty.authentication.util.dto.authentication.AuthenticationRequest;
-import com.chatty.authentication.util.dto.authentication.MessageResponse;
-import com.chatty.authentication.util.dto.authentication.RegisterRequest;
-import com.chatty.authentication.util.dto.errors.logic.ErrorCode;
-import com.chatty.authentication.util.dto.user.UserInfo;
-import com.chatty.authentication.util.dto.user.UserRequest;
-import com.chatty.authentication.util.exceptions.token.TokenNotFoundException;
+import com.chatty.authentication.dto.AccessTokenResponse;
+import com.chatty.authentication.dto.AuthenticationRequest;
+import com.chatty.util.dto.MessageResponse;
+import com.chatty.authentication.dto.RegisterRequest;
+import com.chatty.util.dto.UserCreationForUserServiceRequest;
+import com.chatty.util.dto.UserCreationForChatServiceRequest;
+import com.chatty.util.errors.logic.ErrorCode;
+import com.chatty.util.exceptions.token.TokenNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -26,8 +25,6 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-@CrossOrigin
-@Slf4j
 public class AuthenticationRestController {
     private final AuthenticationService authService;
     private final WebClient.Builder webClientBuilder;
@@ -40,15 +37,13 @@ public class AuthenticationRestController {
     ) {
         User user = authService.register(request);
 
-        var userInfo = UserInfo.builder()
+        var userInfo = UserCreationForUserServiceRequest.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .dateOfBirth(request.getDateOfBirth())
                 .build();
 
         String accessToken = tokenService.generateAccessToken(user);
-
-        log.info("Sent request to create user");
 
         webClientBuilder.build().post()
                 .uri("http://user-management-service/api/v1/users/new")
@@ -58,7 +53,7 @@ public class AuthenticationRestController {
                 .bodyToMono(Void.class)
                 .block();
 
-        var userRequest = UserRequest.builder()
+        var userRequest = UserCreationForChatServiceRequest.builder()
                 .username(request.getUsername())
                 .build();
 

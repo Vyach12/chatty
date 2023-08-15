@@ -1,5 +1,7 @@
 package com.chatty.usermanagement.services;
 
+import com.chatty.util.errors.logic.ErrorCode;
+import com.chatty.util.exceptions.token.WrongTypeTokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -9,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.function.Function;
 
@@ -19,19 +22,27 @@ public class TokenService {
     @Value("${application.security.jwt.access-token.secret-key}")
     private String secretAccess;
 
-    private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+    @Value("${application.http.auth-header-start}")
+    private String authHeaderStart;
+
+    public String getToken(String bearerToken) {
+        if(!bearerToken.startsWith(authHeaderStart)) {
+            throw WrongTypeTokenException.builder()
+                    .errorCode(ErrorCode.UNSSUPPORTED_TOKEN)
+                    .dataCausedError(bearerToken)
+                    .errorMessage("Type of token is not bearer")
+                    .errorDate(LocalDateTime.now())
+                    .build();
+        }
+        return bearerToken.substring(7);
     }
+
     public String extractSubject(String token) {
         return extractClaim(token, Claims::getSubject);
     }
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
-    }
-
-    public Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
     }
 
     private Claims extractAllClaims(String token) {

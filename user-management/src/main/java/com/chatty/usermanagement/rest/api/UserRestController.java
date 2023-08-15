@@ -3,9 +3,9 @@ package com.chatty.usermanagement.rest.api;
 import com.chatty.usermanagement.models.User;
 import com.chatty.usermanagement.services.TokenService;
 import com.chatty.usermanagement.services.UserService;
-import com.chatty.usermanagement.util.dto.user.UserInfo;
-import com.chatty.usermanagement.util.dto.errors.logic.ErrorCode;
-import com.chatty.usermanagement.util.exceptions.user.IdOccupiedException;
+import com.chatty.util.dto.UserCreationForUserServiceRequest;
+import com.chatty.util.errors.logic.ErrorCode;
+import com.chatty.util.exceptions.user.IdOccupiedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -36,12 +36,13 @@ public class UserRestController {
 
     @PostMapping("/new")
     public void createUser(
-            @RequestBody UserInfo request,
+            @RequestBody UserCreationForUserServiceRequest request,
             @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken
     ) {
         log.info("Creating user {}", request.getUsername());
-        bearerToken = bearerToken.substring(7);
-        UUID id = UUID.fromString(tokenService.extractSubject(bearerToken));
+        String accessToken = tokenService.getToken(bearerToken);
+
+        UUID id = UUID.fromString(tokenService.extractSubject(accessToken));
         if(userService.existById(id)){
             throw IdOccupiedException.builder()
                     .errorCode(ErrorCode.ID_IS_OCCUPIED)

@@ -2,9 +2,9 @@ package com.chatty.usermanagement.services;
 
 import com.chatty.usermanagement.models.User;
 import com.chatty.usermanagement.repositories.UserRepository;
-import com.chatty.usermanagement.util.dto.errors.logic.ErrorCode;
-import com.chatty.usermanagement.util.dto.user.UserDTO;
-import com.chatty.usermanagement.util.exceptions.user.UserNotFoundException;
+import com.chatty.usermanagement.dto.UserDTO;
+import com.chatty.util.errors.logic.ErrorCode;
+import com.chatty.util.exceptions.user.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -42,14 +42,6 @@ public class UserService {
 
     public boolean existById(UUID id) {
         return userRepository.existsById(id);
-    }
-
-    public boolean existByUsername(String username) {
-        return userRepository.existsByUsername(username);
-    }
-
-    public boolean existByEmail(String email) {
-        return userRepository.existsByEmail(email);
     }
 
     public void save(User user) {

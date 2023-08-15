@@ -1,12 +1,12 @@
 package com.chatty.authentication.services;
 
 import com.chatty.authentication.models.User;
-import com.chatty.authentication.util.dto.authentication.AuthenticationRequest;
-import com.chatty.authentication.util.dto.authentication.RegisterRequest;
-import com.chatty.authentication.util.dto.errors.logic.ErrorCode;
-import com.chatty.authentication.util.exceptions.authentication.InvalidUsernamePasswordException;
-import com.chatty.authentication.util.exceptions.user.EmailOccupiedException;
-import com.chatty.authentication.util.exceptions.user.UsernameOccupiedException;
+import com.chatty.authentication.dto.AuthenticationRequest;
+import com.chatty.authentication.dto.RegisterRequest;
+import com.chatty.util.errors.logic.ErrorCode;
+import com.chatty.util.exceptions.authentication.InvalidUsernamePasswordException;
+import com.chatty.util.exceptions.user.EmailOccupiedException;
+import com.chatty.util.exceptions.user.UsernameOccupiedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;

@@ -11,9 +11,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface UserRepository extends MongoRepository<User, ObjectId> {
-    Optional<User> findUserById(ObjectId id);
+    Optional<User> findUserById(String id);
     @NonNull
     List<User> findAll();
 
-    boolean existsById(UUID id);
+    boolean existsById(String id);
 }

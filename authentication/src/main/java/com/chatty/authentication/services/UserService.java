@@ -2,8 +2,8 @@ package com.chatty.authentication.services;
 
 import com.chatty.authentication.models.User;
 import com.chatty.authentication.repositories.UserRepository;
-import com.chatty.authentication.util.dto.errors.logic.ErrorCode;
-import com.chatty.authentication.util.exceptions.user.UserNotFoundException;
+import com.chatty.util.errors.logic.ErrorCode;
+import com.chatty.util.exceptions.user.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

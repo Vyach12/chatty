@@ -3,27 +3,27 @@ package com.chatty.chatsupport.rest.api;
 import com.chatty.chatsupport.models.Chat;
 import com.chatty.chatsupport.models.Message;
 import com.chatty.chatsupport.models.User;
-import com.chatty.chatsupport.repositories.UserRepository;
 import com.chatty.chatsupport.services.ChatService;
 import com.chatty.chatsupport.services.TokenService;
 import com.chatty.chatsupport.services.UserService;
-import com.chatty.chatsupport.util.dto.authentication.MessageResponse;
-import com.chatty.chatsupport.util.dto.chats.ChatDTO;
-import com.chatty.chatsupport.util.dto.chats.ChatRequest;
-import com.chatty.chatsupport.util.dto.errors.logic.ErrorCode;
-import com.chatty.chatsupport.util.dto.message.MessageDTO;
-import com.chatty.chatsupport.util.dto.user.UserRequest;
-import com.chatty.chatsupport.util.exceptions.user.IdOccupiedException;
+import com.chatty.chatsupport.dto.chats.ChatDTO;
+import com.chatty.chatsupport.dto.chats.ChatCreationRequest;
+import com.chatty.chatsupport.dto.message.MessageDTO;
+import com.chatty.util.dto.MessageResponse;
+import com.chatty.util.dto.UserCreationForChatServiceRequest;
+import com.chatty.util.errors.logic.ErrorCode;
+import com.chatty.util.exceptions.chat.NoAccessException;
+import com.chatty.util.exceptions.user.DuplicatedUsersException;
+import com.chatty.util.exceptions.user.IdOccupiedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.bson.types.ObjectId;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -38,29 +38,68 @@ public class ChatRestController {
     @GetMapping
     public ResponseEntity<?> getChats(@RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
         String accessToken = tokenService.getToken(bearerToken);
-        ObjectId user = new ObjectId(tokenService.extractSubject(accessToken));
-        List<ChatDTO> chats = chatService.findChatsById(user);
+        String userID = tokenService.extractSubject(accessToken);
+
+        List<ChatDTO> chats = chatService.findChatsById(userService.findUserById(userID)).stream()
+                .map(chatService::convertToChatDTO)
+                .toList();;
         return ResponseEntity.ok(chats);
     }
 
     @PostMapping
     public ResponseEntity<?> createChat(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken,
-            @RequestBody ChatRequest chatRequest
+            @RequestBody ChatCreationRequest chatCreationRequest
     ) {
         String accessToken = tokenService.getToken(bearerToken);
-        chatRequest.getUsers().add(new ObjectId(tokenService.extractSubject(accessToken)));
+        User user = userService.findUserById(tokenService.extractSubject(accessToken));
+
+        List<User> users = chatCreationRequest.getUsers();
+        users.add(user);
+
+        List<User> uniqueUsers = users.stream().distinct().toList();
+        if (uniqueUsers.size() != chatCreationRequest.getUsers().size()) {
+            throw DuplicatedUsersException.builder()
+                    .errorCode(ErrorCode.DUPLICATED_USERS)
+                    .errorDate(LocalDateTime.now())
+                    .dataCausedError(users)
+                    .errorMessage("You cannot create chat with duplicated users")
+                    .build();
+        }
+
         Chat chat = Chat.builder()
-                .users(chatRequest.getUsers())
+                .name(chatCreationRequest.getName())
+                .users(uniqueUsers)
                 .messages(Collections.emptyList())
                 .build();
+
         chatService.save(chat);
 
-        return ResponseEntity.ok(
-                new MessageResponse("chat successfully created")
-        );
+        return ResponseEntity.ok(new MessageResponse("chat successfully created"));
     }
 
+    @GetMapping("/{chatID}")
+    public ResponseEntity<?> getInfo(
+            @PathVariable String chatID,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken
+    ) {
+        String accessToken = tokenService.getToken(bearerToken);
+        String userID = tokenService.extractSubject(accessToken);
+
+        User user = userService.findUserById(userID);
+        Chat chat = chatService.findChatById(chatID);
+
+        if(!chatService.canAccess(chat,user)) {
+            throw NoAccessException.builder()
+                    .errorCode(ErrorCode.NO_ACCESS)
+                    .errorMessage("No access to the chat")
+                    .dataCausedError(chat.getId())
+                    .errorDate(LocalDateTime.now())
+                    .build();
+        }
+
+        return ResponseEntity.ok(chat);
+    }
 
     @GetMapping("/message/{chatID}")
     public ResponseEntity<?> getMessages(
@@ -68,11 +107,10 @@ public class ChatRestController {
             @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken
     ) {
         String accessToken = tokenService.getToken(bearerToken);
-        ObjectId userId = new ObjectId(tokenService.extractSubject(accessToken));
-        List<Message> messages = chatService.getMessagesFromChat(new ObjectId(chatID), userId);
+        String userID = tokenService.extractSubject(accessToken);
+        List<Message> messages = chatService.getMessagesFromChat(chatService.findChatById(chatID), userService.findUserById(userID));
         return ResponseEntity.ok(messages);
     }
-
 
     @PostMapping("/message/{chatId}")
     public ResponseEntity<?> sendMessage(
@@ -81,11 +119,11 @@ public class ChatRestController {
             @RequestBody MessageDTO messageDTO
     ) {
 
-        Chat chat = chatService.findChatById(new ObjectId(chatId));
+        Chat chat = chatService.findChatById(chatId);
         String accessToken = tokenService.getToken(bearerToken);
 
         Message message = Message.builder()
-                .id(UUID.randomUUID())
+                .id(UUID.randomUUID().toString())
                 .text(messageDTO.getText())
                 .sender(tokenService.extractSubject(accessToken))
                 .dateOfSending(LocalDateTime.now())
@@ -105,25 +143,22 @@ public class ChatRestController {
 
     @PostMapping("/users/new")
     public void createUser(
-            @RequestBody UserRequest request,
+            @RequestBody UserCreationForChatServiceRequest request,
             @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
-        log.info("Creating user {}", request.getUsername());
-
         String accessToken = tokenService.getToken(bearerToken);
+        String userID = tokenService.extractSubject(accessToken);
 
-        UUID id = UUID.fromString(tokenService.extractSubject(accessToken));
-
-        if(userService.existById(id)){
+        if(userService.existById(userID)){
             throw IdOccupiedException.builder()
                     .errorCode(ErrorCode.ID_IS_OCCUPIED)
                     .errorDate(LocalDateTime.now())
-                    .dataCausedError(id)
-                    .errorMessage("User with id = " + id + " already exists")
+                    .dataCausedError(userID)
+                    .errorMessage("User with id = " + userID + " already exists")
                     .build();
         }
 
         User user = User.builder()
-                .id(id)
+                .id(userID)
                 .username(request.getUsername())
                 .build();
 

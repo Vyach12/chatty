@@ -3,6 +3,7 @@ package com.chatty.chatsupport.models;
 import lombok.*;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
@@ -16,8 +17,9 @@ import java.util.List;
 @Document(collection = "chats")
 public class Chat {
     @Id
-    private ObjectId id;
+    private String id;
     private String name;
-    private List<ObjectId> users;
+    @DBRef
+    private List<User> users;
     private List<Message> messages;
 }

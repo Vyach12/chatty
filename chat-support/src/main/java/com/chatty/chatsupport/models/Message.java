@@ -13,7 +13,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Message {
 
-    private UUID id;
+    private String id;
     private String sender;
     private String text;
     private LocalDateTime dateOfSending;
