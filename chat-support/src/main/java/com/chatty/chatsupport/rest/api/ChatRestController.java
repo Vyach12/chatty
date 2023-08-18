@@ -17,13 +17,13 @@ import com.chatty.util.exceptions.user.DuplicatedUsersException;
 import com.chatty.util.exceptions.user.IdOccupiedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @RestController
@@ -141,27 +141,25 @@ public class ChatRestController {
         return ResponseEntity.ok(userService.findAll());
     }
 
-    @PostMapping("/users/new")
+    @RabbitListener(queues = "chat.queue")
     public void createUser(
-            @RequestBody UserCreationForChatServiceRequest request,
-            @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
-        String accessToken = tokenService.getToken(bearerToken);
-        String userID = tokenService.extractSubject(accessToken);
+            @RequestBody UserCreationForChatServiceRequest request) {
 
-        if(userService.existById(userID)){
+        if(userService.existById(request.getId())){
             throw IdOccupiedException.builder()
                     .errorCode(ErrorCode.ID_IS_OCCUPIED)
                     .errorDate(LocalDateTime.now())
-                    .dataCausedError(userID)
-                    .errorMessage("User with id = " + userID + " already exists")
+                    .dataCausedError(request.getId())
+                    .errorMessage("User with id = " + request.getId() + " already exists")
                     .build();
         }
 
         User user = User.builder()
-                .id(userID)
+                .id(request.getId())
                 .username(request.getUsername())
                 .build();
 
         userService.save(user);
     }
+
 }

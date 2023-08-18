@@ -7,5 +7,6 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class UserCreationForChatServiceRequest {
+    private String id;
     private String username;
 }

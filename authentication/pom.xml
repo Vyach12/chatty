@@ -95,7 +95,13 @@
             <version>3.1.1</version>
         </dependency>
 
-        <dependency>
+
+		<dependency>
+			<groupId>com.chatty</groupId>
+			<artifactId>amqp</artifactId>
+			<version>0.0.1</version>
+		</dependency>
+		<dependency>
             <groupId>com.chatty</groupId>
             <artifactId>util</artifactId>
             <version>0.0.1</version>

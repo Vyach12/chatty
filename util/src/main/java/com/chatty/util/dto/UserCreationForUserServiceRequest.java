@@ -13,6 +13,7 @@ import java.util.Date;
 @NoArgsConstructor
 @Builder
 public class UserCreationForUserServiceRequest {
+    private String id;
     private String username;
     private String email;
     private Date dateOfBirth;

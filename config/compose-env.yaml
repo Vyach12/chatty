@@ -28,3 +28,10 @@ services:
     restart: always
     ports:
       - "27017:27017"
+
+  rabbitmq:
+    image: rabbitmq:3.12.2
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"

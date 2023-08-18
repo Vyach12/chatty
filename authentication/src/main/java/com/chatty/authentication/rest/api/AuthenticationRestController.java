@@ -1,5 +1,6 @@
 package com.chatty.authentication.rest.api;
 
+import com.chatty.amqp.RabbitMQMessageProducer;
 import com.chatty.authentication.models.Token;
 import com.chatty.authentication.models.User;
 import com.chatty.authentication.services.AuthenticationService;
@@ -15,9 +16,9 @@ import com.chatty.util.errors.logic.ErrorCode;
 import com.chatty.util.exceptions.token.TokenNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -27,50 +28,47 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AuthenticationRestController {
     private final AuthenticationService authService;
-    private final WebClient.Builder webClientBuilder;
     private final TokenService tokenService;
     private final UserService userService;
+    private final RabbitMQMessageProducer messageProducer;
 
-    @PostMapping("register")
+    @Value("${rabbitmq.exchanges.internal}")
+    private String rabbitExchange;
+
+    @Value("${rabbitmq.routing-keys.chat}")
+    private String rabbitChatRoutingKey;
+
+    @Value("${rabbitmq.routing-keys.user}")
+    private String rabbitUserRoutingKey;
+
+    @PostMapping("/register")
     public ResponseEntity<?> register(
             @Valid @RequestBody RegisterRequest request
     ) {
         User user = authService.register(request);
 
-        var userInfo = UserCreationForUserServiceRequest.builder()
+        var userCreationForUserServiceRequest = UserCreationForUserServiceRequest.builder()
+                .id(user.getId().toString())
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .dateOfBirth(request.getDateOfBirth())
                 .build();
 
-        String accessToken = tokenService.generateAccessToken(user);
+        messageProducer.publish(userCreationForUserServiceRequest, rabbitExchange, rabbitUserRoutingKey);
 
-        webClientBuilder.build().post()
-                .uri("http://user-management-service/api/v1/users/new")
-                .header("Authorization", "Bearer " + accessToken)
-                .bodyValue(userInfo)
-                .retrieve()
-                .bodyToMono(Void.class)
-                .block();
-
-        var userRequest = UserCreationForChatServiceRequest.builder()
+        var userCreationForChatServiceRequest = UserCreationForChatServiceRequest.builder()
+                .id(user.getId().toString())
                 .username(request.getUsername())
                 .build();
 
-        webClientBuilder.build().post()
-                .uri("http://chat-support-service/api/v1/chats/users/new")
-                .header("Authorization", "Bearer " + accessToken)
-                .bodyValue(userRequest)
-                .retrieve()
-                .bodyToMono(Void.class)
-                .block();
+        messageProducer.publish(userCreationForChatServiceRequest, rabbitExchange, rabbitChatRoutingKey);
 
         ResponseCookie cookie = tokenService.generateRefreshTokenCookie(user);
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(new AccessTokenResponse(accessToken));
+                .body(new AccessTokenResponse(tokenService.generateAccessToken(user)));
     }
 
-    @PostMapping("authenticate")
+    @PostMapping("/authenticate")
     public ResponseEntity<?> authenticate(
             @Valid @RequestBody AuthenticationRequest request
     ){
@@ -80,7 +78,7 @@ public class AuthenticationRestController {
                 .body(new AccessTokenResponse(tokenService.generateAccessToken(user)));
     }
 
-    @PostMapping("logout")
+    @PostMapping("/logout")
     public ResponseEntity<?> logout(
             @CookieValue("refresh_token") String refreshToken
     ) {
@@ -90,7 +88,7 @@ public class AuthenticationRestController {
                 .body(new MessageResponse("You've been signed out!"));
     }
 
-    @PostMapping("refresh-token")
+    @PostMapping("/refresh-token")
     public ResponseEntity<?> refresh(
             @CookieValue("refresh_token") String refreshToken
     ) {

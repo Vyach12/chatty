@@ -8,6 +8,7 @@ import com.chatty.util.errors.logic.ErrorCode;
 import com.chatty.util.exceptions.user.IdOccupiedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,15 +35,13 @@ public class UserRestController {
         );
     }
 
-    @PostMapping("/new")
+    @RabbitListener(queues = "user.queue")
     public void createUser(
-            @RequestBody UserCreationForUserServiceRequest request,
-            @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken
+            @RequestBody UserCreationForUserServiceRequest request
     ) {
         log.info("Creating user {}", request.getUsername());
-        String accessToken = tokenService.getToken(bearerToken);
 
-        UUID id = UUID.fromString(tokenService.extractSubject(accessToken));
+        UUID id = UUID.fromString(request.getId());
         if(userService.existById(id)){
             throw IdOccupiedException.builder()
                     .errorCode(ErrorCode.ID_IS_OCCUPIED)

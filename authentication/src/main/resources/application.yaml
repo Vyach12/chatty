@@ -26,6 +26,14 @@ eureka:
     service-url:
       defaultZone: http://localhost:8761/eureka
 
+rabbitmq:
+  routing-keys:
+    user: user.queue
+    chat: chat.queue
+  exchanges:
+    internal: internal.exchange
+
+
 application:
   security:
     jwt:
