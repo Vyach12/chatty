@@ -44,7 +44,7 @@ public class TokenService {
                     .errorDate(LocalDateTime.now())
                     .build();
         }
-        return bearerToken.substring(7);
+        return bearerToken.substring(authHeaderStart.length());
     }
 
     private Claims extractAllClaims(String token) {

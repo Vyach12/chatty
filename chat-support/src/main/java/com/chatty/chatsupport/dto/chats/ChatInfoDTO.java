@@ -1,18 +1,20 @@
 package com.chatty.chatsupport.dto.chats;
 
+import com.chatty.chatsupport.models.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import org.bson.types.ObjectId;
+
+import java.util.List;
 
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
-public class ChatDTO {
+public class ChatInfoDTO {
+
     private String id;
     private String name;
-    private String lastMessage;
-    private String lastMessageOwner;
+    private List<User> users;
 }

@@ -2,7 +2,6 @@ package com.chatty.chatsupport.repositories;
 
 import com.chatty.chatsupport.models.Chat;
 import com.chatty.chatsupport.models.User;
-import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

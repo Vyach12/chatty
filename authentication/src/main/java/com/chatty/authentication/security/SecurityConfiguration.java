@@ -33,11 +33,7 @@ public class SecurityConfiguration {
                 .sessionManagement(sessionManagement -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .authenticationProvider(authenticationProvider)
-                .logout(
-                        logout -> logout
-                                .logoutUrl("/api/v1/auth/logout")
-                );
+                .authenticationProvider(authenticationProvider);
         return http.build();
     }
 }

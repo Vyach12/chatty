@@ -1,10 +1,10 @@
 package com.chatty.chatsupport.models;
 
 import lombok.*;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -14,7 +14,8 @@ import java.util.UUID;
 public class Message {
 
     private String id;
-    private String sender;
+    @DBRef
+    private User sender;
     private String text;
     private LocalDateTime dateOfSending;
     private LocalDateTime dateOfChange;

@@ -6,8 +6,12 @@ spring:
       host: chats_db
       port: 27017
       database: chats_db
-  flyway:
-    locations: classpath:db/migration
+  rabbitmq:
+    queue:
+      chat: chat.queue
+    exchange: internal.exchange
+    routing-key:
+      chat: chat.queue
 
 server:
   port: 0

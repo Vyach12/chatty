@@ -1,4 +1,5 @@
-package com.chatty.chatsupport.config;
+package com.chatty.usermanagement.config;
+
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
@@ -7,6 +8,6 @@ import org.springframework.data.mongodb.config.AbstractMongoClientConfiguration;
 public class MongoConfig extends AbstractMongoClientConfiguration {
     @Override
     protected String getDatabaseName() {
-        return "chats_db";
+        return "users_db";
     }
 }

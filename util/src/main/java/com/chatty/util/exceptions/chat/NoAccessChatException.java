@@ -1,4 +1,4 @@
-package com.chatty.util.exceptions.user;
+package com.chatty.util.exceptions.chat;
 
 import com.chatty.util.errors.logic.ErrorCode;
 import com.chatty.util.exceptions.BaseException;
@@ -8,9 +8,9 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 
 @Getter
-public class UserIsNotEnabledException extends BaseException {
+public class NoAccessChatException extends BaseException {
     @Builder
-    public UserIsNotEnabledException(LocalDateTime errorDate, String errorMessage, ErrorCode errorCode, Object dataCausedError) {
+    public NoAccessChatException(LocalDateTime errorDate, String errorMessage, ErrorCode errorCode, Object dataCausedError) {
         super(errorDate, errorMessage, errorCode, dataCausedError);
     }
 }

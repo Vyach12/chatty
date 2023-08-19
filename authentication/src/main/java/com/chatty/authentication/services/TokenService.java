@@ -3,6 +3,8 @@ package com.chatty.authentication.services;
 import com.chatty.authentication.models.Token;
 import com.chatty.authentication.models.User;
 import com.chatty.authentication.repositories.TokenRepository;
+import com.chatty.util.errors.logic.ErrorCode;
+import com.chatty.util.exceptions.token.WrongTypeTokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -14,6 +16,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,9 +26,6 @@ import java.util.function.Function;
 @Service
 @RequiredArgsConstructor
 public class TokenService {
-    @Value("${application.http.auth-header-name}")
-    private String authHeaderName;
-
     @Value("${application.http.auth-header-start}")
     private String authHeaderStart;
 
@@ -42,6 +42,7 @@ public class TokenService {
     private int accessExpirationTimeMs;
     @Value("${application.security.jwt.refresh-token.expiration}")
     private int refreshExpirationTimeMs;
+
     private final TokenRepository tokenRepository;
 
     public void save(Token storedToken) {
@@ -90,6 +91,17 @@ public class TokenService {
         } catch (Exception e) {
             return false;
         }
+    }
+    public String getToken(String bearerToken) {
+        if(!bearerToken.startsWith(authHeaderStart)) {
+            throw WrongTypeTokenException.builder()
+                    .errorCode(ErrorCode.UNSSUPPORTED_TOKEN)
+                    .dataCausedError(bearerToken)
+                    .errorMessage("Type of token is not bearer")
+                    .errorDate(LocalDateTime.now())
+                    .build();
+        }
+        return bearerToken.substring(authHeaderStart.length());
     }
 
 

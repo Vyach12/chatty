@@ -1,17 +1,18 @@
 spring:
   application:
     name: user-management-service
-  datasource:
-    url: jdbc:postgresql://${DATASOURCE_HOST:localhost}:5444/users_db
-    username: postgres
-    password: postgres
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    properties:
-      hibernate:
-        format_sql: true
-    database: postgresql
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  data:
+    mongodb:
+      host: users_db
+      port: 27018
+      database: users_db
+  rabbitmq:
+    queue:
+      user: user.queue
+    exchange: internal.exchange
+    routing-key:
+      user: user.queue
+
 
 server:
   port: 0
@@ -21,13 +22,10 @@ eureka:
     service-url:
       defaultZone: http://localhost:8761/eureka
 
-
-
 application:
   security:
     jwt:
       access-token:
         secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
   http:
-    auth-header-name: 'Authorization'
     auth-header-start: 'Bearer '

@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.function.Function;
 
 @Service
@@ -34,7 +33,7 @@ public class TokenService {
                     .errorDate(LocalDateTime.now())
                     .build();
         }
-        return bearerToken.substring(7);
+        return bearerToken.substring(authHeaderStart.length());
     }
 
     public String extractSubject(String token) {

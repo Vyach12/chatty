@@ -1,13 +1,10 @@
 package com.chatty.chatsupport.models;
 
 import lombok.*;
-import org.bson.types.ObjectId;
-import org.modelmapper.internal.bytebuddy.build.HashCodeAndEqualsPlugin;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Objects;
-import java.util.UUID;
 
 @Getter
 @Setter
