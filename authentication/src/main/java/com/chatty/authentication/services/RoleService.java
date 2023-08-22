@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class RoleService {
     private final RoleRepository roleRepository;
     public Role findByName(String name) {
-        return roleRepository.findByName(name).orElseThrow(
+        return roleRepository.findRoleByName(name).orElseThrow(
                 () -> RoleNotFoundException.builder()
                         .errorCode(ErrorCode.ROLE_NOT_FOUND)
                         .errorDate(LocalDateTime.now())

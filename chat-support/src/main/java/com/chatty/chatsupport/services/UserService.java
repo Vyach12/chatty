@@ -2,6 +2,7 @@ package com.chatty.chatsupport.services;
 
 import com.chatty.chatsupport.models.User;
 import com.chatty.chatsupport.repositories.UserRepository;
+import com.chatty.util.dto.NewUsernameRequest;
 import com.chatty.util.dto.UserCreationForChatServiceRequest;
 import com.chatty.util.errors.logic.ErrorCode;
 import com.chatty.util.exceptions.user.IdOccupiedException;
@@ -51,10 +52,16 @@ public class UserService {
     }
 
     private boolean existById(String id) {
-        return userRepository.existsById(id);
+        return userRepository.existsUserById(id);
     }
 
     private void save(User user) {
         userRepository.save(user);
+    }
+
+    public void changeUsername(NewUsernameRequest request) {
+        User user = findUserById(request.getId());
+        user.setUsername(request.getUsername());
+        save(user);
     }
 }

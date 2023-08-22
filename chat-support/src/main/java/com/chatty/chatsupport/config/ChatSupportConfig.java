@@ -10,28 +10,38 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class ChatSupportConfig {
-
-    @Value("spring.rabbitmq.queue.chat")
-    private String queue;
-
-    @Value("spring.rabbitmq.exchange")
+    @Value("${rabbitmq.queue.user-creation}")
+    private String createUserQueue;
+    @Value("${rabbitmq.queue.username-change}")
+    private String usernameChangeQueue;
+    @Value("${rabbitmq.routing-key.chat-support.user-creation}")
+    private String createUserRoutingKey;
+    @Value("${rabbitmq.routing-key.username-change}")
+    private String changeUsernameRoutingKey;
+    @Value("${rabbitmq.exchange}")
     private String exchange;
 
-    @Value("spring.rabbitmq.routing-key.chat")
-    private String routingKey;
+    @Bean
+    public Queue chatSupportCreateUserQueue() {
+        return new Queue(createUserQueue);
+    }
 
     @Bean
-    public Queue chatQueue() {
-        return new Queue(queue);
+    public Queue chatSupportChangeUsernameQueue() {
+        return new Queue(usernameChangeQueue);
     }
+
     @Bean
     public DirectExchange exchange() {
         return new DirectExchange(exchange);
     }
-
     @Bean
-    public Binding chatBinding() {
-        return BindingBuilder.bind(chatQueue()).to(exchange()).with(routingKey);
+    public Binding chatSupportCreateUserBinding() {
+        return BindingBuilder.bind(chatSupportCreateUserQueue()).to(exchange()).with(createUserRoutingKey);
     }
 
+    @Bean
+    public Binding chatSupportChangeUsernameBinding(){
+        return BindingBuilder.bind(chatSupportChangeUsernameQueue()).to(exchange()).with(changeUsernameRoutingKey);
+    }
 }

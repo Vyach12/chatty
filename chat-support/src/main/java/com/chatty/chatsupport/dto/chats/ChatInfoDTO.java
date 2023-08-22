@@ -1,10 +1,7 @@
 package com.chatty.chatsupport.dto.chats;
 
 import com.chatty.chatsupport.models.User;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
@@ -12,6 +9,7 @@ import java.util.List;
 @Setter
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class ChatInfoDTO {
 
     private String id;

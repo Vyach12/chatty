@@ -1,4 +1,4 @@
-package com.chatty.chatsupport.rest.api;
+package com.chatty.chatsupport.api.rest;
 
 import com.chatty.chatsupport.models.Chat;
 import com.chatty.chatsupport.models.User;
@@ -8,9 +8,9 @@ import com.chatty.chatsupport.services.UserService;
 import com.chatty.chatsupport.dto.chats.ChatCreationRequest;
 import com.chatty.chatsupport.dto.message.MessageDTO;
 import com.chatty.util.dto.MessageResponse;
+import com.chatty.util.dto.NewUsernameRequest;
 import com.chatty.util.dto.UserCreationForChatServiceRequest;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/chats")
 @RequiredArgsConstructor
-@Slf4j
 public class ChatRestController {
     private final ChatService chatService;
     private final TokenService tokenService;
@@ -94,13 +93,6 @@ public class ChatRestController {
     @GetMapping("/users")
     public ResponseEntity<?> getUsers(){
         return ResponseEntity.ok(userService.findAll());
-    }
-
-    @RabbitListener(queues = "chat.queue")
-    public void createUser(
-            @RequestBody UserCreationForChatServiceRequest request
-    ) {
-        userService.createUser(request);
     }
 
 }

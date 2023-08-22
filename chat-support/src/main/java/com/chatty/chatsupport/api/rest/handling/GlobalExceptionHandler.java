@@ -1,4 +1,4 @@
-package com.chatty.authentication.rest.api.handling;
+package com.chatty.chatsupport.api.rest.handling;
 
 import com.chatty.util.errors.data.DataFieldError;
 import com.chatty.util.errors.data.InvalidDataResponse;

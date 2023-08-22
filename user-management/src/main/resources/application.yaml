@@ -6,12 +6,16 @@ spring:
       host: users_db
       port: 27018
       database: users_db
-  rabbitmq:
-    queue:
-      user: user.queue
-    exchange: internal.exchange
-    routing-key:
-      user: user.queue
+
+rabbitmq:
+  queue:
+    user-creation: user-management-creation-queue
+  exchange: internal.exchange
+  routing-key:
+    user-management:
+      user-creation: user-management-creation
+    username-change: username-change
+
 
 
 server:

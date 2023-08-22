@@ -1,4 +1,4 @@
-package com.chatty.authentication.rest.api;
+package com.chatty.authentication.api.rest;
 
 import com.chatty.authentication.models.Token;
 import com.chatty.authentication.models.User;
@@ -9,11 +9,13 @@ import com.chatty.authentication.dto.AccessTokenResponse;
 import com.chatty.authentication.dto.AuthenticationRequest;
 import com.chatty.util.dto.MessageResponse;
 import com.chatty.authentication.dto.RegisterRequest;
+import com.chatty.util.dto.NewUsernameRequest;
 import com.chatty.util.errors.logic.ErrorCode;
 import com.chatty.util.exceptions.token.TokenNotFoundException;
 import com.chatty.util.exceptions.token.TokenNotValidException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,7 +50,7 @@ public class AuthenticationRestController {
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(
-            @CookieValue("refresh_token") String refreshToken
+            @CookieValue("${application.http.refresh-token-name}") String refreshToken
     ) {
         tokenService.delete(refreshToken);
         ResponseCookie cookie = tokenService.getCleanJwtCookie();
@@ -58,7 +60,7 @@ public class AuthenticationRestController {
 
     @PostMapping("/refresh-token")
     public ResponseEntity<?> refresh(
-            @CookieValue("refresh_token") String refreshToken
+            @CookieValue("${application.http.refresh-token-name}") String refreshToken
     ) {
         Optional<Token> storedToken = tokenService.findByToken(refreshToken);
 
@@ -80,7 +82,7 @@ public class AuthenticationRestController {
                     .build();
         }
         String id = tokenService.extractSubject(refreshToken);
-        User user = userService.findById(id);
+        User user = userService.findUserById(id);
         tokenService.delete(refreshToken);
 
         ResponseCookie cookie = tokenService.generateRefreshTokenCookie(user);

@@ -1,14 +1,12 @@
 package com.chatty.chatsupport.dto.chats;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class ChatForPresentationDTO {
     private String id;
     private String name;

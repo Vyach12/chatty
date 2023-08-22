@@ -30,7 +30,7 @@ public class TokenService {
     private String authHeaderStart;
 
     @Value("${application.http.refresh-token-name}")
-    private  String refreshTokenName;
+    private String refreshTokenName;
 
     @Value("${application.security.jwt.access-token.secret-key}")
     private String secretAccess;

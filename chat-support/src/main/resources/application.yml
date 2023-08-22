@@ -6,12 +6,16 @@ spring:
       host: chats_db
       port: 27017
       database: chats_db
-  rabbitmq:
-    queue:
-      chat: chat.queue
-    exchange: internal.exchange
-    routing-key:
-      chat: chat.queue
+
+rabbitmq:
+  queue:
+    user-creation: chat-support-creation-queue
+    username-change: chat-support-change-username-queue
+  exchange: internal.exchange
+  routing-key:
+    chat-support:
+      user-creation: chat-support-creation
+    username-change: username-change
 
 server:
   port: 0

@@ -1,4 +1,4 @@
-package com.chatty.usermanagement.config;
+package com.chatty.authentication.config;
 
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -9,24 +9,24 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class UserManagementConfig {
-    @Value("${rabbitmq.queue.user-creation}")
-    private String createUserQueue;
-    @Value("${rabbitmq.routing-key.user-management.user-creation}")
-    private String createUserRoutingKey;
+public class AuthenticationConfig {
+    @Value("${rabbitmq.queue.username-change}")
+    private String usernameChangeQueue;
+    @Value("${rabbitmq.routing-key.username-change}")
+    private String usernameChangeRoutingKey;
     @Value("${rabbitmq.exchange}")
     private String exchange;
 
     @Bean
-    public Queue userManagementCreateUserQueue() {
-        return new Queue(createUserQueue);
+    public Queue authenticationChangeUsernameQueue() {
+        return new Queue(usernameChangeQueue);
     }
     @Bean
     public DirectExchange exchange() {
         return new DirectExchange(exchange);
     }
     @Bean
-    public Binding userManagementCreateUserBinding() {
-        return BindingBuilder.bind(userManagementCreateUserQueue()).to(exchange()).with(createUserRoutingKey);
+    public Binding authenticationChangeUsernameBinding() {
+        return BindingBuilder.bind(authenticationChangeUsernameQueue()).to(exchange()).with(usernameChangeRoutingKey);
     }
 }

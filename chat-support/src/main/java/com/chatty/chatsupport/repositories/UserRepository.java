@@ -13,5 +13,5 @@ public interface UserRepository extends MongoRepository<User, ObjectId> {
     @NonNull
     List<User> findAll();
 
-    boolean existsById(String id);
+    boolean existsUserById(String id);
 }

@@ -1,5 +1,4 @@
 spring:
-
   application:
     name: authentication-service
   datasource:
@@ -18,6 +17,17 @@ spring:
     user: postgres
     password: postgres
 
+rabbitmq:
+  queue:
+    username-change: authentication-change-username-queue
+  exchange: internal.exchange
+  routing-key:
+    chat-support:
+      user-creation-chat-support: chat-support-creation
+    user-management:
+      user-creation-user-management: user-management-creation
+    username-change: username-change
+
 server:
   port: 0
 
@@ -25,13 +35,6 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka
-
-rabbitmq:
-  routing-keys:
-    user: user.queue
-    chat: chat.queue
-  exchanges:
-    internal: internal.exchange
 
 
 application:

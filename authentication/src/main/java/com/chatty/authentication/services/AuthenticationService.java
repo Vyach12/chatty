@@ -23,16 +23,12 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class AuthenticationService {
-
-    @Value("${rabbitmq.exchanges.internal}")
+    @Value("${rabbitmq.exchange}")
     private String rabbitExchange;
-
-    @Value("${rabbitmq.routing-keys.chat}")
+    @Value("${rabbitmq.routing-key.chat-support.user-creation-chat-support}")
     private String rabbitChatRoutingKey;
-
-    @Value("${rabbitmq.routing-keys.user}")
+    @Value("${rabbitmq.routing-key.user-management.user-creation-user-management}")
     private String rabbitUserRoutingKey;
 
     private final AuthenticationManager authenticationManager;
@@ -42,7 +38,6 @@ public class AuthenticationService {
     private final RabbitMQMessageProducer messageProducer;
 
     public void register(RegisterRequest request) {
-        log.info("sent request for getting user from register");
         if (userService.existByUsername(request.getUsername())) {
             throw UsernameOccupiedException.builder()
                     .errorCode(ErrorCode.USERNAME_IS_OCCUPIED)
@@ -68,7 +63,6 @@ public class AuthenticationService {
                 .isEnabled(true)
                 .role(roleService.findByName("ROLE_USER"))
                 .build();
-
         userService.save(user);
 
         var userCreationForUserServiceRequest = UserCreationForUserServiceRequest.builder()
@@ -87,7 +81,6 @@ public class AuthenticationService {
     }
 
     public User authenticate(AuthenticationRequest request) {
-        log.info("sent request for getting user from authenticate");
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(

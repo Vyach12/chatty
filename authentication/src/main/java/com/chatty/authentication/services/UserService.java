@@ -2,6 +2,7 @@ package com.chatty.authentication.services;
 
 import com.chatty.authentication.models.User;
 import com.chatty.authentication.repositories.UserRepository;
+import com.chatty.util.dto.NewUsernameRequest;
 import com.chatty.util.errors.logic.ErrorCode;
 import com.chatty.util.exceptions.user.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ public class UserService {
                         .build()
                 );
     }
-    public User findById(String id) {
+    public User findUserById(String id) {
         return userRepository.findById(UUID.fromString(id))
                 .orElseThrow(() -> UserNotFoundException.builder()
                         .errorCode(ErrorCode.USER_NOT_FOUND)
@@ -56,6 +57,12 @@ public class UserService {
     public void changeEnabled(String username) {
         User user = findByUsername(username);
         user.setEnabled(!user.isEnabled());
+        save(user);
+    }
+
+    public void changeUsername(NewUsernameRequest request) {
+        User user = findUserById(request.getId());
+        user.setUsername(request.getUsername());
         save(user);
     }
 }
