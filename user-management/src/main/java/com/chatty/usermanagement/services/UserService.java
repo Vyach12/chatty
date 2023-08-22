@@ -44,7 +44,7 @@ public class UserService {
     }
 
     public void createUser(UserCreationForUserServiceRequest request) {
-        String id = request.getId();
+        String id = request.id();
         if(existById(id)){
             throw IdOccupiedException.builder()
                     .errorCode(ErrorCode.ID_IS_OCCUPIED)
@@ -55,9 +55,9 @@ public class UserService {
         }
         User user = User.builder()
                 .id(id)
-                .username(request.getUsername())
-                .email(request.getEmail())
-                .dateOfBirth(request.getDateOfBirth())
+                .username(request.username())
+                .email(request.email())
+                .dateOfBirth(request.dateOfBirth())
                 .build();
         save(user);
     }

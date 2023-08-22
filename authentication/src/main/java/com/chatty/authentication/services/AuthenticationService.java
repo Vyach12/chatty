@@ -38,28 +38,28 @@ public class AuthenticationService {
     private final RabbitMQMessageProducer messageProducer;
 
     public void register(RegisterRequest request) {
-        if (userService.existByUsername(request.getUsername())) {
+        if (userService.existByUsername(request.username())) {
             throw UsernameOccupiedException.builder()
                     .errorCode(ErrorCode.USERNAME_IS_OCCUPIED)
                     .errorDate(LocalDateTime.now())
                     .dataCausedError(request)
-                    .errorMessage("User with username " + request.getUsername() + " already exist")
+                    .errorMessage("User with username " + request.username() + " already exist")
                     .build();
         }
 
-        if (userService.existByEmail(request.getEmail())) {
+        if (userService.existByEmail(request.email())) {
             throw EmailOccupiedException.builder()
                     .errorCode(ErrorCode.EMAIL_IS_OCCUPIED)
                     .errorDate(LocalDateTime.now())
                     .dataCausedError(request)
-                    .errorMessage("User with email " + request.getEmail() + " already exist")
+                    .errorMessage("User with email " + request.email() + " already exist")
                     .build();
         }
 
         var user = User.builder()
-                .username(request.getUsername())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .email(request.getEmail())
+                .username(request.username())
+                .password(passwordEncoder.encode(request.password()))
+                .email(request.email())
                 .isEnabled(true)
                 .role(roleService.findByName("ROLE_USER"))
                 .build();
@@ -67,15 +67,15 @@ public class AuthenticationService {
 
         var userCreationForUserServiceRequest = UserCreationForUserServiceRequest.builder()
                 .id(user.getId().toString())
-                .username(request.getUsername())
-                .email(request.getEmail())
-                .dateOfBirth(request.getDateOfBirth())
+                .username(request.username())
+                .email(request.email())
+                .dateOfBirth(request.dateOfBirth())
                 .build();
         messageProducer.publish(userCreationForUserServiceRequest, rabbitExchange, rabbitUserRoutingKey);
 
         var userCreationForChatServiceRequest = UserCreationForChatServiceRequest.builder()
                 .id(user.getId().toString())
-                .username(request.getUsername())
+                .username(request.username())
                 .build();
         messageProducer.publish(userCreationForChatServiceRequest, rabbitExchange, rabbitChatRoutingKey);
     }
@@ -84,8 +84,8 @@ public class AuthenticationService {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            request.getUsername(),
-                            request.getPassword()
+                            request.username(),
+                            request.password()
                     )
             );
         } catch (AuthenticationException e) {
@@ -97,6 +97,6 @@ public class AuthenticationService {
                     .build();
         }
 
-        return userService.findByUsername(request.getUsername());
+        return userService.findByUsername(request.username());
     }
 }

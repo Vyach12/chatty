@@ -10,6 +10,7 @@ import com.chatty.chatsupport.dto.message.MessageDTO;
 import com.chatty.util.dto.MessageResponse;
 import com.chatty.util.dto.NewUsernameRequest;
 import com.chatty.util.dto.UserCreationForChatServiceRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.http.HttpHeaders;
@@ -28,10 +29,9 @@ public class ChatRestController {
     @GetMapping
     public ResponseEntity<?> getChats(@RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken) {
         String accessToken = tokenService.getToken(bearerToken);
-        String userID = tokenService.extractSubject(accessToken);
 
         return ResponseEntity.ok(
-                chatService.findChatsById(userService.findUserById(userID)).stream()
+                chatService.findChatsById(userService.findUserById(tokenService.extractSubject(accessToken))).stream()
                         .map(chatService::convertToChatDTO)
                         .toList()
         );
@@ -40,11 +40,12 @@ public class ChatRestController {
     @PostMapping
     public ResponseEntity<?> createChat(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken,
-            @RequestBody ChatCreationRequest chatCreationRequest
+            @Valid @RequestBody ChatCreationRequest chatCreationRequest
     ) {
         String accessToken = tokenService.getToken(bearerToken);
         User user = userService.findUserById(tokenService.extractSubject(accessToken));
-        chatService.createChat(chatCreationRequest.getUsers(), user, chatCreationRequest.getName());
+
+        chatService.createChat(chatCreationRequest.users(), user, chatCreationRequest.name());
 
         return ResponseEntity.ok(new MessageResponse("chat successfully created"));
     }

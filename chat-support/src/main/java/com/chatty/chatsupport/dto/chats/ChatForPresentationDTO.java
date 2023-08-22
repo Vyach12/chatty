@@ -1,15 +1,6 @@
 package com.chatty.chatsupport.dto.chats;
 
-import lombok.*;
+import lombok.Builder;
 
-@Getter
-@Setter
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class ChatForPresentationDTO {
-    private String id;
-    private String name;
-    private String lastMessage;
-    private String lastMessageOwner;
-}
+public record ChatForPresentationDTO(String id, String name, String lastMessage, String lastMessageOwner){}

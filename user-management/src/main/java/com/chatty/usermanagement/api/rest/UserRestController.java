@@ -6,6 +6,7 @@ import com.chatty.usermanagement.models.User;
 import com.chatty.usermanagement.services.TokenService;
 import com.chatty.usermanagement.services.UserService;
 import com.chatty.util.dto.UserCreationForUserServiceRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -36,13 +37,13 @@ public class UserRestController {
     @PatchMapping("/username")
     public ResponseEntity<?> changeUsername(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken,
-            @RequestBody ChangeUsernameRequest request
+            @Valid @RequestBody ChangeUsernameRequest request
     ) {
         String accessToken = tokenService.getToken(bearerToken);
 
         User user = userService.findUserById(tokenService.extractSubject(accessToken));
 
-        userService.changeUsername(user, request.getUsername());
+        userService.changeUsername(user, request.username());
         return ResponseEntity.ok(new MessageResponse("Username successfully changed"));
     }
 }

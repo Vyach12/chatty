@@ -94,7 +94,7 @@ public class ChatService {
             throw DuplicatedUsersException.builder()
                     .errorCode(ErrorCode.DUPLICATED_USERS)
                     .errorDate(LocalDateTime.now())
-                    .dataCausedError(users.size())
+                    .dataCausedError(users)
                     .errorMessage("You cannot create chat with duplicated users")
                     .build();
         }
@@ -119,12 +119,12 @@ public class ChatService {
 
         Message message = Message.builder()
                 .id(UUID.randomUUID().toString())
-                .text(messageDTO.getText())
+                .text(messageDTO.text())
                 .sender(sender)
                 .dateOfSending(LocalDateTime.now())
-                .music(messageDTO.getMusic())
-                .images(messageDTO.getImages())
-                .videos(messageDTO.getVideos())
+                .music(messageDTO.music())
+                .images(messageDTO.images())
+                .videos(messageDTO.videos())
                 .build();
 
         saveMessage(chat, message);

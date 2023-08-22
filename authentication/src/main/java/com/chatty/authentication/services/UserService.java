@@ -46,23 +46,13 @@ public class UserService {
         return userRepository.existsByEmail(email);
     }
 
-    public boolean isEnabled(String username) {
-        return findByUsername(username).isEnabled();
-    }
-
     public void save(User user) {
         userRepository.save(user);
     }
 
-    public void changeEnabled(String username) {
-        User user = findByUsername(username);
-        user.setEnabled(!user.isEnabled());
-        save(user);
-    }
-
     public void changeUsername(NewUsernameRequest request) {
-        User user = findUserById(request.getId());
-        user.setUsername(request.getUsername());
+        User user = findUserById(request.id());
+        user.setUsername(request.username());
         save(user);
     }
 }

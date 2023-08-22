@@ -9,13 +9,11 @@ import com.chatty.authentication.dto.AccessTokenResponse;
 import com.chatty.authentication.dto.AuthenticationRequest;
 import com.chatty.util.dto.MessageResponse;
 import com.chatty.authentication.dto.RegisterRequest;
-import com.chatty.util.dto.NewUsernameRequest;
 import com.chatty.util.errors.logic.ErrorCode;
 import com.chatty.util.exceptions.token.TokenNotFoundException;
 import com.chatty.util.exceptions.token.TokenNotValidException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 

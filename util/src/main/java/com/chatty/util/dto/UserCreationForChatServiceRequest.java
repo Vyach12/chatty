@@ -1,12 +1,6 @@
 package com.chatty.util.dto;
 
-import lombok.*;
+import lombok.Builder;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
-public class UserCreationForChatServiceRequest {
-    private String id;
-    private String username;
-}
+public record UserCreationForChatServiceRequest(String id, String username){ }

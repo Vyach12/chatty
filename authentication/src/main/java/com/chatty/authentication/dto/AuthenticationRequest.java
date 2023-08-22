@@ -1,17 +1,10 @@
 package com.chatty.authentication.dto;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
 
-@Getter
-@Setter
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class AuthenticationRequest {
-
-    @NotNull
-    private String username;
-    @NotNull
-    public String password;
-}
+public record AuthenticationRequest(
+        @NotNull(message = "The request must contain the username field")
+        String username,
+        @NotNull(message = "The request must contain the password field")
+        String password
+){}

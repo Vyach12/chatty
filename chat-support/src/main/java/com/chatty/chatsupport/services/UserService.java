@@ -34,18 +34,18 @@ public class UserService {
 
 
     public void createUser(UserCreationForChatServiceRequest request) {
-        if(existById(request.getId())){
+        if(existById(request.id())){
             throw IdOccupiedException.builder()
                     .errorCode(ErrorCode.ID_IS_OCCUPIED)
                     .errorDate(LocalDateTime.now())
-                    .dataCausedError(request.getId())
-                    .errorMessage("User with id = " + request.getId() + " already exists")
+                    .dataCausedError(request.id())
+                    .errorMessage("User with id = " + request.id() + " already exists")
                     .build();
         }
 
         User user = User.builder()
-                .id(request.getId())
-                .username(request.getUsername())
+                .id(request.id())
+                .username(request.username())
                 .build();
 
         save(user);
@@ -60,8 +60,8 @@ public class UserService {
     }
 
     public void changeUsername(NewUsernameRequest request) {
-        User user = findUserById(request.getId());
-        user.setUsername(request.getUsername());
+        User user = findUserById(request.id());
+        user.setUsername(request.username());
         save(user);
     }
 }
